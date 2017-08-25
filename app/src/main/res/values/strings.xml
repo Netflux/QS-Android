@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">QS-Android</string>
+    
+    <string name="label_curServing">Currently Serving:</string>
+    <string name="label_yourNumber">Your Number:</string>
+    <string name="label_getTicket">Get Ticket</string>
+</resources>
