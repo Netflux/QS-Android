@@ -16,9 +16,9 @@ public final class DBContracts {
 
 		public static final String TABLE = "Ticket";
 		public static final String COL_KEY = "key";
-		public static final String COL_NUMBER = "number";
 		public static final String COL_TIME_CREATED = "time_created";
 		public static final String COL_TIME_SERVED = "time_served";
+		public static final String COL_DURATION = "duration";
 		public static final String COL_CANCELLED = "cancelled";
 
 	}

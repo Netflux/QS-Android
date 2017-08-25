@@ -20,9 +20,9 @@ public class TicketModel extends BaseDBModel<Ticket> {
 	private static final String[] DEFAULT_COL_PROJECTION = new String[] {
 			TicketContract._ID,
 			TicketContract.COL_KEY,
-			TicketContract.COL_NUMBER,
 			TicketContract.COL_TIME_CREATED,
 			TicketContract.COL_TIME_SERVED,
+			TicketContract.COL_DURATION,
 			TicketContract.COL_CANCELLED
 	};
 
@@ -38,9 +38,9 @@ public class TicketModel extends BaseDBModel<Ticket> {
 
 		contentValues.put(TicketContract._ID, ticket.getId());
 		contentValues.put(TicketContract.COL_KEY, ticket.getKey());
-		contentValues.put(TicketContract.COL_NUMBER, ticket.getNumber());
 		contentValues.put(TicketContract.COL_TIME_CREATED, ticket.getTimeCreated());
 		contentValues.put(TicketContract.COL_TIME_SERVED, ticket.getTimeServed());
+		contentValues.put(TicketContract.COL_DURATION, ticket.getDuration());
 		contentValues.put(TicketContract.COL_CANCELLED, ticket.getCancelled());
 
 		db.insertWithOnConflict(TicketContract.TABLE, null, contentValues, SQLiteDatabase.CONFLICT_REPLACE);
@@ -134,9 +134,9 @@ public class TicketModel extends BaseDBModel<Ticket> {
 						new Ticket(
 								c.getLong(c.getColumnIndexOrThrow(TicketContract._ID)),
 								c.getString(c.getColumnIndexOrThrow(TicketContract.COL_KEY)),
-								c.getInt(c.getColumnIndexOrThrow(TicketContract.COL_NUMBER)),
 								c.getLong(c.getColumnIndexOrThrow(TicketContract.COL_TIME_CREATED)),
 								c.getLong(c.getColumnIndexOrThrow(TicketContract.COL_TIME_SERVED)),
+								c.getLong(c.getColumnIndexOrThrow(TicketContract.COL_DURATION)),
 								c.getInt(c.getColumnIndexOrThrow(TicketContract.COL_CANCELLED)) == 1
 						)
 				);
