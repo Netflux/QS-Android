@@ -35,13 +35,30 @@ public class HomeView implements IHomeView {
 	}
 
 	@Override
-	public void setTicketNumber(String number) {
-		_text_curTicket.setText(number);
+	public void setTicketNumber(long number) {
+		if (number == -1) {
+			_text_curTicket.setText("-");
+		} else {
+			_text_curTicket.setText(String.valueOf(number));
+		}
 	}
 
 	@Override
-	public void setServingNumber(String number) {
-		_text_curServing.setText(number);
+	public void setServingNumber(long number) {
+		if (number == -1) {
+			_text_curServing.setText("-");
+		} else {
+			_text_curServing.setText(String.valueOf(number));
+		}
+	}
+
+	@Override
+	public void toggleTicketButtonMode(boolean mode) {
+		if (mode) {
+			_button_handleTicket.setText(R.string.label_cancelTicket);
+		} else {
+			_button_handleTicket.setText(R.string.label_getTicket);
+		}
 	}
 
 	@Override

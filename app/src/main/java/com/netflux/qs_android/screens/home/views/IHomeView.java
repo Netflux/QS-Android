@@ -18,13 +18,19 @@ public interface IHomeView extends IBaseView {
 	 * Set the number for the currently active ticket.
 	 * @param number The number (as string).
 	 */
-	void setTicketNumber(String number);
+	void setTicketNumber(long number);
 
 	/**
 	 * Set the number for the ticket being served.
 	 * @param number The number (as string).
 	 */
-	void setServingNumber(String number);
+	void setServingNumber(long number);
+
+	/**
+	 * Toggle the "Handle Ticket" button mode.
+	 * @param mode Whether the user already has a ticket.
+	 */
+	void toggleTicketButtonMode(boolean mode);
 
 	/**
 	 * Set a listener for the Home View.

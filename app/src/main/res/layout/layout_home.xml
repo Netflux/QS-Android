@@ -1,56 +1,62 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:orientation="vertical"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent">
 
-    <TextView
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingTop="16dp"
-        android:text="@string/label_yourNumber"
-        android:textAlignment="center"
-        android:textSize="16sp"/>
+        android:layout_height="wrap_content">
 
-    <TextView
-        android:id="@+id/text_curTicket"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="52000"
-        android:textAlignment="center"
-        android:textSize="56sp"
-        android:textStyle="bold"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="16dp"
+            android:text="@string/label_yourNumber"
+            android:textAlignment="center"
+            android:textSize="16sp"/>
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingTop="16dp"
-        android:text="@string/label_curServing"
-        android:textAlignment="center"
-        android:textSize="16sp"/>
+        <TextView
+            android:id="@+id/text_curTicket"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAlignment="center"
+            android:textSize="56sp"
+            android:textStyle="bold"/>
 
-    <TextView
-        android:id="@+id/text_curServing"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="52000"
-        android:textAlignment="center"
-        android:textSize="34sp"
-        android:textStyle="bold"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="16dp"
+            android:text="@string/label_curServing"
+            android:textAlignment="center"
+            android:textSize="16sp"/>
 
-    <Button
-        android:id="@+id/button_handleTicket"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="12dp"
-        android:layout_marginEnd="12dp"
-        android:layout_marginStart="12dp"
-        android:layout_marginTop="12dp"
-        android:text="@string/label_getTicket"/>
+        <TextView
+            android:id="@+id/text_curServing"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAlignment="center"
+            android:textSize="34sp"
+            android:textStyle="bold"/>
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="2dp"
-        android:background="?attr/colorButtonNormal"/>
+        <Button
+            android:id="@+id/button_handleTicket"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:layout_marginEnd="12dp"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="12dp"
+            android:text="@string/label_getTicket"/>
 
-</LinearLayout>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:background="?attr/colorButtonNormal"/>
+
+    </LinearLayout>
+
+</ScrollView>

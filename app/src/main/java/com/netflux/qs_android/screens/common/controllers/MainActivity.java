@@ -11,7 +11,9 @@ public class MainActivity extends BaseActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
-		replaceFragment(HomeFragment.class, false, null);
+		
+		if (savedInstanceState == null) {
+			replaceFragment(HomeFragment.class, false, null);
+		}
 	}
 }

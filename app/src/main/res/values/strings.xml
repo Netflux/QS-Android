@@ -1,7 +1,9 @@
 <resources>
     <string name="app_name">QS-Android</string>
+    <string name="desc_updateService">Service for handling periodic network updates.</string>
     
     <string name="label_curServing">Currently Serving:</string>
     <string name="label_yourNumber">Your Number:</string>
     <string name="label_getTicket">Get Ticket</string>
+    <string name="label_cancelTicket">Cancel Ticket</string>
 </resources>
