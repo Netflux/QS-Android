@@ -102,7 +102,7 @@ public class TicketModel extends BaseDBModel<Ticket> {
 	}
 
 	@Nullable
-	public Ticket getSync(int id) {
+	public Ticket getSync(long id) {
 		SQLiteDatabase db = getDBOpenHelper().getReadableDatabase();
 
 		String whereClause = TicketContract._ID + " = ?";

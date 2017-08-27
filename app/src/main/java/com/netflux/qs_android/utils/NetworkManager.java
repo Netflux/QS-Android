@@ -107,6 +107,38 @@ public class NetworkManager {
 		}
 	}
 
+	public boolean cancelTicket(Ticket ticket) {
+		JSONObject payload = new JSONObject();
+		try {
+			payload.put("key", Utils.getUUID(_context));
+		} catch (JSONException e) {
+			Log.e(TAG, e.toString());
+			return false;
+		}
+
+		HttpURLConnection conn = null;
+		OutputStream out = null;
+
+		try {
+			conn = buildConnection(Constants.SERVER_URL + "/api/tickets/" + ticket.getId(), "DELETE");
+			conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+			conn.setDoOutput(true);
+
+			out = conn.getOutputStream();
+			out.write(payload.toString().getBytes("UTF-8"));
+			out.close();
+
+			return conn.getResponseCode() == 204;
+		} catch (IOException e) {
+			Log.e(TAG, e.toString());
+			return false;
+		} finally {
+			if (conn != null) {
+				conn.disconnect();
+			}
+		}
+	}
+
 	/**
 	 * Helper function to build a HTTP URL connection object.
 	 * @param address - The target address.

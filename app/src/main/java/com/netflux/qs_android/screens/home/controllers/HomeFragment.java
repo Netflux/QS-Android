@@ -59,11 +59,13 @@ public class HomeFragment extends BaseFragment implements IHomeView.HomeViewList
 
 	@Override
 	public void handleTicket() {
-		if (_prefs.getLong(Constants.Prefs.TICKET_CURRENT_ID, -1) == -1) {
-			// Fetch a new ticket from the server
-			BackgroundThreadPoster.getInstance().post(new Runnable() {
-				@Override
-				public void run() {
+		BackgroundThreadPoster.getInstance().post(new Runnable() {
+			@Override
+			public void run() {
+				long id = _prefs.getLong(Constants.Prefs.TICKET_CURRENT_ID, -1);
+
+				if (id == -1) {
+					// Fetch a new ticket from the server
 					final Ticket ticket = _networkManager.getNewTicket();
 
 					if (ticket != null) {
@@ -72,20 +74,29 @@ public class HomeFragment extends BaseFragment implements IHomeView.HomeViewList
 						editor.apply();
 
 						_ticketModel.addOrUpdateSync(ticket);
+					}
+				} else {
+					// Cancel the current ticket on the server
+					Ticket ticket = _ticketModel.getSync(id);
 
-						MainThreadPoster.getInstance().post(new Runnable() {
-							@Override
-							public void run() {
-								_view.setTicketNumber(ticket.getId());
-								_view.toggleTicketButtonMode(ticket.getId() != -1);
-							}
-						});
+					if (ticket != null && _networkManager.cancelTicket(ticket)) {
+						SharedPreferences.Editor editor = _prefs.edit();
+						editor.putLong(Constants.Prefs.TICKET_CURRENT_ID, -1);
+						editor.apply();
 					}
 				}
-			});
-		} else {
-			// Cancel the current ticket on the server
-			// TODO
-		}
+
+				final long finalID = _prefs.getLong(Constants.Prefs.TICKET_CURRENT_ID, -1);
+
+				// Update the UI display
+				MainThreadPoster.getInstance().post(new Runnable() {
+					@Override
+					public void run() {
+						_view.setTicketNumber(finalID);
+						_view.toggleTicketButtonMode(finalID != -1);
+					}
+				});
+			}
+		});
 	}
 }
