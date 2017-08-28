@@ -20,7 +20,7 @@ public class App extends Application {
 
 		_networkManager = new NetworkManager(this);
 		_helper = new BaseDBOpenHelper(this, new QSDatabase());
-		_ticketModel = new TicketModel(_helper);
+		_ticketModel = new TicketModel(this, _helper);
 	}
 
 	public NetworkManager getNetworkManager() {

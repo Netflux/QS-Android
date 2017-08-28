@@ -11,6 +11,7 @@ public final class Constants {
 	}
 
 	public static final String SERVER_URL = "http://127.0.0.1";
+	public static final String SERVER_URL_WS = "ws://127.0.0.1";
 
 	public static final class Prefs {
 
@@ -18,6 +19,12 @@ public final class Constants {
 		public static final String LAST_ID = "PREFS_LAST_ID";
 		public static final String TICKET_CURRENT_ID = "PREFS_TICKET_CURRENT_ID";
 		public static final String TICKET_SERVING_ID = "PREFS_TICKET_SERVING_ID";
+
+	}
+
+	public static final class WebSocket {
+
+		public static final String MSG_TICKETS_UPDATED = "MSG_TICKETS_UPDATED";
 
 	}
 

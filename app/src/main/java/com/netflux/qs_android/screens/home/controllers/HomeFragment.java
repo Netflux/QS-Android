@@ -1,13 +1,17 @@
 package com.netflux.qs_android.screens.home.controllers;
 
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import com.netflux.adp.ui.controller.BaseFragment;
 import com.netflux.adp.util.BackgroundThreadPoster;
@@ -20,15 +24,33 @@ import com.netflux.qs_android.screens.home.views.HomeView;
 import com.netflux.qs_android.screens.home.views.IHomeView;
 import com.netflux.qs_android.utils.Constants;
 import com.netflux.qs_android.utils.NetworkManager;
+import com.netflux.qs_android.utils.UpdateService;
 
 
-public class HomeFragment extends BaseFragment implements IHomeView.HomeViewListener {
+public class HomeFragment extends BaseFragment implements
+		IHomeView.HomeViewListener,
+		UpdateService.UpdateServiceListener {
+
+	private ServiceConnection _serviceConnection = new ServiceConnection() {
+		@Override
+		public void onServiceConnected(ComponentName name, IBinder service) {
+			_updateService = ((UpdateService.UpdateServiceBinder) service).getService();
+			_updateService.registerListener(HomeFragment.this);
+		}
+
+		@Override
+		public void onServiceDisconnected(ComponentName name) {
+			_updateService.unregisterListener(HomeFragment.this);
+			_updateService = null;
+		}
+	};
 
 	private HomeView _view;
 
 	private SharedPreferences _prefs;
 	private NetworkManager _networkManager;
 	private TicketModel _ticketModel;
+	private UpdateService _updateService;
 
 	@Nullable
 	@Override
@@ -38,14 +60,6 @@ public class HomeFragment extends BaseFragment implements IHomeView.HomeViewList
 
 		getToolbar().setTitle(R.string.app_name);
 
-		_prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
-		long currentTicketID = _prefs.getLong(Constants.Prefs.TICKET_CURRENT_ID, -1);
-		long servingTicketID = _prefs.getLong(Constants.Prefs.TICKET_SERVING_ID, -1);
-
-		_view.setTicketNumber(currentTicketID);
-		_view.setServingNumber(servingTicketID);
-		_view.toggleTicketButtonMode(currentTicketID != -1);
-
 		return _view.getRootView();
 	}
 
@@ -53,8 +67,31 @@ public class HomeFragment extends BaseFragment implements IHomeView.HomeViewList
 	public void onActivityCreated(@Nullable Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
 
+		_prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
 		_networkManager = ((App) getActivity().getApplication()).getNetworkManager();
 		_ticketModel = ((App) getActivity().getApplication()).getTicketModel();
+
+		updateTicketDisplay();
+	}
+
+	@Override
+	public void onStart() {
+		super.onStart();
+
+		// Bind to the Update Service
+		Intent intent = new Intent(getActivity(), UpdateService.class);
+		getActivity().bindService(intent, _serviceConnection, Context.BIND_AUTO_CREATE);
+	}
+
+	@Override
+	public void onStop() {
+		super.onStop();
+
+		// If bound, unbind from the Update Service
+		if (_updateService != null) {
+			_updateService.unregisterListener(this);
+			getActivity().unbindService(_serviceConnection);
+		}
 	}
 
 	@Override
@@ -86,17 +123,34 @@ public class HomeFragment extends BaseFragment implements IHomeView.HomeViewList
 					}
 				}
 
-				final long finalID = _prefs.getLong(Constants.Prefs.TICKET_CURRENT_ID, -1);
-
 				// Update the UI display
 				MainThreadPoster.getInstance().post(new Runnable() {
 					@Override
 					public void run() {
-						_view.setTicketNumber(finalID);
-						_view.toggleTicketButtonMode(finalID != -1);
+						updateTicketDisplay();
 					}
 				});
 			}
 		});
 	}
+
+	private void updateTicketDisplay() {
+		long currentTicketID = _prefs.getLong(Constants.Prefs.TICKET_CURRENT_ID, -1);
+		long servingTicketID = _prefs.getLong(Constants.Prefs.TICKET_SERVING_ID, -1);
+
+		_view.setTicketNumber(currentTicketID);
+		_view.setServingNumber(servingTicketID);
+		_view.toggleTicketButtonMode(currentTicketID != -1);
+	}
+
+	@Override
+	public void onStartUpdate() {
+		// No action required
+	}
+
+	@Override
+	public void onFinishUpdate() {
+		updateTicketDisplay();
+	}
+
 }

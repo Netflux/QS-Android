@@ -1,15 +1,16 @@
 package com.netflux.qs_android.data.models;
 
 import android.content.ContentValues;
+import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.Nullable;
 
 import com.netflux.adp.data.BaseDBModel;
 import com.netflux.adp.data.BaseDBOpenHelper;
-import com.netflux.adp.util.BackgroundThreadPoster;
 import com.netflux.qs_android.data.DBContracts.TicketContract;
 import com.netflux.qs_android.data.pojos.Ticket;
+import com.netflux.qs_android.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,8 +29,12 @@ public class TicketModel extends BaseDBModel<Ticket> {
 
 	private static final String DEFAULT_SORT_ORDER = TicketContract._ID;
 
-	public TicketModel(BaseDBOpenHelper openHelper) {
+	private Context _context;
+
+	public TicketModel(Context context, BaseDBOpenHelper openHelper) {
 		super(openHelper);
+
+		_context = context;
 	}
 
 	public void addOrUpdateSync(Ticket ticket) {
@@ -39,8 +44,12 @@ public class TicketModel extends BaseDBModel<Ticket> {
 		contentValues.put(TicketContract._ID, ticket.getId());
 		contentValues.put(TicketContract.COL_KEY, ticket.getKey());
 		contentValues.put(TicketContract.COL_TIME_CREATED, ticket.getTimeCreated());
-		contentValues.put(TicketContract.COL_TIME_SERVED, ticket.getTimeServed());
-		contentValues.put(TicketContract.COL_DURATION, ticket.getDuration());
+		if (ticket.getTimeServed() != -1) {
+			contentValues.put(TicketContract.COL_TIME_SERVED, ticket.getTimeServed());
+		}
+		if (ticket.getDuration() != -1) {
+			contentValues.put(TicketContract.COL_DURATION, ticket.getDuration());
+		}
 		contentValues.put(TicketContract.COL_CANCELLED, ticket.getCancelled());
 
 		db.insertWithOnConflict(TicketContract.TABLE, null, contentValues, SQLiteDatabase.CONFLICT_REPLACE);
@@ -48,28 +57,10 @@ public class TicketModel extends BaseDBModel<Ticket> {
 		notifyUpdated(ticket);
 	}
 
-	public void addOrUpdate(final Ticket ticket) {
-		BackgroundThreadPoster.getInstance().post(new Runnable() {
-			@Override
-			public void run() {
-				addOrUpdateSync(ticket);
-			}
-		});
-	}
-
 	public void addOrUpdateSync(List<Ticket> tickets) {
 		for (Ticket ticket : tickets) {
 			addOrUpdateSync(ticket);
 		}
-	}
-
-	public void addOrUpdate(final List<Ticket> tickets) {
-		BackgroundThreadPoster.getInstance().post(new Runnable() {
-			@Override
-			public void run() {
-				addOrUpdateSync(tickets);
-			}
-		});
 	}
 
 	public List<Ticket> getAllSync() {
@@ -92,15 +83,6 @@ public class TicketModel extends BaseDBModel<Ticket> {
 		return result;
 	}
 
-	public void getAll() {
-		BackgroundThreadPoster.getInstance().post(new Runnable() {
-			@Override
-			public void run() {
-				notifyFetched(getAllSync());
-			}
-		});
-	}
-
 	@Nullable
 	public Ticket getSync(long id) {
 		SQLiteDatabase db = getDBOpenHelper().getReadableDatabase();
@@ -113,6 +95,58 @@ public class TicketModel extends BaseDBModel<Ticket> {
 				DEFAULT_COL_PROJECTION,
 				whereClause,
 				whereArgs,
+				null,
+				null,
+				DEFAULT_SORT_ORDER
+		);
+
+		List<Ticket> result = extractFromCursor(c);
+
+		if (c != null) c.close();
+
+		return result.size() == 0 ? null : result.get(0);
+	}
+
+	@Nullable
+	public Ticket getCurrentSync() {
+		SQLiteDatabase db = getDBOpenHelper().getReadableDatabase();
+
+		String whereClause = TicketContract.COL_KEY + " = ? AND " +
+				TicketContract.COL_TIME_SERVED + " IS NULL AND " +
+				TicketContract.COL_DURATION + " IS NULL AND " +
+				TicketContract.COL_CANCELLED + " = 0";
+		String[] whereArgs = { Utils.getUUID(_context) };
+
+		Cursor c = db.query(
+				TicketContract.TABLE,
+				DEFAULT_COL_PROJECTION,
+				whereClause,
+				whereArgs,
+				null,
+				null,
+				DEFAULT_SORT_ORDER
+		);
+
+		List<Ticket> result = extractFromCursor(c);
+
+		if (c != null) c.close();
+
+		return result.size() == 0 ? null : result.get(0);
+	}
+
+	@Nullable
+	public Ticket getServingSync() {
+		SQLiteDatabase db = getDBOpenHelper().getReadableDatabase();
+
+		String whereClause = TicketContract.COL_TIME_SERVED + " IS NULL AND " +
+				TicketContract.COL_DURATION + " IS NULL AND " +
+				TicketContract.COL_CANCELLED + " = 0";
+
+		Cursor c = db.query(
+				TicketContract.TABLE,
+				DEFAULT_COL_PROJECTION,
+				whereClause,
+				null,
 				null,
 				null,
 				DEFAULT_SORT_ORDER
