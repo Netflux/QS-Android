@@ -136,6 +136,10 @@ public class UpdateService extends Service {
 				editor.apply();
 			}
 
+			// Start the notification service
+			Intent intent = new Intent(this, NotificationService.class);
+			startService(intent);
+
 			_isUpdating = false;
 			notifyFinishUpdate();
 		}

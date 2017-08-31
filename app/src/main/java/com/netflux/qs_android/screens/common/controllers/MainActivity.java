@@ -16,4 +16,5 @@ public class MainActivity extends BaseActivity {
 			replaceFragment(HomeFragment.class, false, null);
 		}
 	}
+
 }

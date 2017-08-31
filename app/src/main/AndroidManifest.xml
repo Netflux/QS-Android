@@ -28,6 +28,10 @@
                  android:description="@string/desc_updateService"
                  android:exported="false"/>
 
+        <service android:name=".utils.NotificationService"
+                 android:description="@string/desc_notificationService"
+                 android:exported="false"/>
+
     </application>
 
 </manifest>
