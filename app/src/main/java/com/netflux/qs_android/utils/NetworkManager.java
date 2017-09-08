@@ -83,7 +83,7 @@ public class NetworkManager {
 			out.write(payload.toString().getBytes("UTF-8"));
 			out.close();
 
-			if (conn.getResponseCode() == 201) {
+			if (conn.getResponseCode() == 200 || conn.getResponseCode() == 201) {
 				in = conn.getInputStream();
 				return Utils.Json.readJsonNewTicket(in);
 			}
