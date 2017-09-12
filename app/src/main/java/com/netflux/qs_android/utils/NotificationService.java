@@ -9,7 +9,6 @@ import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
-import android.support.annotation.IntDef;
 import android.support.annotation.Nullable;
 import android.support.v7.app.NotificationCompat;
 
@@ -41,14 +40,6 @@ public class NotificationService extends Service implements UpdateService.Update
 	@Override
 	public IBinder onBind(Intent intent) {
 		return null;
-	}
-
-	@Override
-	public void onCreate() {
-		super.onCreate();
-
-		Intent serviceIntent = new Intent(this, UpdateService.class);
-		bindService(serviceIntent, _serviceConnection, BIND_AUTO_CREATE);
 	}
 
 	@Override
@@ -101,6 +92,9 @@ public class NotificationService extends Service implements UpdateService.Update
 			stopSelf();
 		} else {
 			startForeground(NOTIFICATION_ID, buildNotification(currentTicketID, servingTicketID));
+
+			Intent serviceIntent = new Intent(this, UpdateService.class);
+			bindService(serviceIntent, _serviceConnection, BIND_AUTO_CREATE);
 		}
 	}
 

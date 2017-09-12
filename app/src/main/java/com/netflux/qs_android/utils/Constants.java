@@ -10,8 +10,8 @@ public final class Constants {
 		throw new AssertionError();
 	}
 
-	public static final String SERVER_URL = "http://127.0.0.1";
-	public static final String SERVER_URL_WS = "ws://127.0.0.1";
+	public static final String SERVER_URL = "http://192.168.0.123:3000";
+	public static final String SERVER_URL_WS = "ws://192.168.0.123:3000";
 
 	public static final class Prefs {
 
@@ -24,6 +24,7 @@ public final class Constants {
 
 	public static final class WebSocket {
 
+		public static final String MSG_TICKETS_CREATED = "MSG_TICKETS_CREATED";
 		public static final String MSG_TICKETS_UPDATED = "MSG_TICKETS_UPDATED";
 
 	}

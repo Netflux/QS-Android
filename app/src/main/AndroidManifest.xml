@@ -13,7 +13,9 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
-        <activity android:name=".screens.common.controllers.MainActivity">
+        <activity
+            android:name=".screens.common.controllers.MainActivity"
+            android:launchMode="singleTask">
 
             <intent-filter>
 

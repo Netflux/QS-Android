@@ -1,10 +1,13 @@
 package com.netflux.qs_android.utils;
 
 import android.app.Service;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
 import android.os.Binder;
-import android.os.Handler;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.v4.util.Pair;
@@ -15,6 +18,7 @@ import com.neovisionaries.ws.client.WebSocketAdapter;
 import com.neovisionaries.ws.client.WebSocketFactory;
 import com.netflux.adp.util.BackgroundThreadPoster;
 import com.netflux.adp.util.MainThreadPoster;
+import com.netflux.adp.util.NetworkUtil;
 import com.netflux.qs_android.App;
 import com.netflux.qs_android.data.models.TicketModel;
 import com.netflux.qs_android.data.pojos.Ticket;
@@ -28,6 +32,19 @@ import java.util.concurrent.ConcurrentHashMap;
 
 
 public class UpdateService extends Service {
+
+	private class NetworkReceiver extends BroadcastReceiver {
+
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			if (NetworkUtil.hasInternetConnection(context)) {
+				setupWebSocket();
+			} else if (_ws != null) {
+				_ws.disconnect();
+			}
+		}
+
+	}
 
 	private static final String TAG = "UpdateService";
 
@@ -53,19 +70,8 @@ public class UpdateService extends Service {
 
 	}
 
+	private final NetworkReceiver _receiver = new NetworkReceiver();
 	private final IBinder _binder = new UpdateServiceBinder();
-	private final Handler _reconnectHandler = new Handler();
-	private final Runnable _reconnectRunnable = new Runnable() {
-		@Override
-		public void run() {
-			if (_ws == null || !_ws.isOpen()) {
-				setupWebSocket();
-			}
-
-			_reconnectHandler.removeCallbacks(_reconnectRunnable);
-			_reconnectHandler.postDelayed(this, 10000);
-		}
-	};
 
 	private NetworkManager _networkManager;
 	private TicketModel _ticketModel;
@@ -90,14 +96,19 @@ public class UpdateService extends Service {
 		_ticketModel = ((App) getApplication()).getTicketModel();
 		_isUpdating = false;
 
-		_reconnectHandler.post(_reconnectRunnable);
+		IntentFilter filter = new IntentFilter();
+		filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+		registerReceiver(_receiver, filter);
 	}
 
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
 
-		_ws.disconnect();
+		unregisterReceiver(_receiver);
+		if (_ws != null) {
+			_ws.disconnect();
+		}
 	}
 
 	@Override
@@ -165,7 +176,8 @@ public class UpdateService extends Service {
 
 				@Override
 				public void onTextMessage(WebSocket websocket, String text) throws Exception {
-					if (text.equals(Constants.WebSocket.MSG_TICKETS_UPDATED)) {
+					if (text.contains(Constants.WebSocket.MSG_TICKETS_CREATED) ||
+							text.contains(Constants.WebSocket.MSG_TICKETS_UPDATED)) {
 						handleUpdate();
 					}
 				}
