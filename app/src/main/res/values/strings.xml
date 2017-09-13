@@ -7,4 +7,17 @@
     <string name="label_yourNumber">Your Number: </string>
     <string name="label_getTicket">Get Ticket</string>
     <string name="label_cancelTicket">Cancel Ticket</string>
+
+    <string name="label_settings">Settings</string>
+    <string name="label_notifications">Notifications</string>
+    <string name="label_notificationTone">Notification tone</string>
+    <string name="label_vibrate">Vibrate</string>
+
+    <string name="label_off">Off</string>
+    <string name="label_default">Default</string>
+    <string name="label_short">Short</string>
+    <string name="label_long">Long</string>
+
+    <string name="prefs_notificationTone">prefs_notificationTone</string>
+    <string name="prefs_vibrate">prefs_vibrate</string>
 </resources>

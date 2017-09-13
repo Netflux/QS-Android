@@ -9,7 +9,9 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -20,8 +22,10 @@ import com.netflux.qs_android.App;
 import com.netflux.qs_android.R;
 import com.netflux.qs_android.data.models.TicketModel;
 import com.netflux.qs_android.data.pojos.Ticket;
+import com.netflux.qs_android.screens.common.controllers.MainActivity;
 import com.netflux.qs_android.screens.home.views.HomeView;
 import com.netflux.qs_android.screens.home.views.IHomeView;
+import com.netflux.qs_android.screens.settings.controllers.SettingsFragment;
 import com.netflux.qs_android.utils.Constants;
 import com.netflux.qs_android.utils.NetworkManager;
 import com.netflux.qs_android.utils.UpdateService;
@@ -58,7 +62,7 @@ public class HomeFragment extends BaseFragment implements
 		_view = new HomeView(inflater, container);
 		_view.setListener(this);
 
-		getToolbar().setTitle(R.string.app_name);
+		setupToolbar();
 
 		return _view.getRootView();
 	}
@@ -141,6 +145,25 @@ public class HomeFragment extends BaseFragment implements
 		_view.setTicketNumber(currentTicketID);
 		_view.setServingNumber(servingTicketID);
 		_view.toggleTicketButtonMode(currentTicketID != -1);
+	}
+
+	private void setupToolbar() {
+		((MainActivity) getActivity()).resetToolbar();
+		Toolbar toolbar = getToolbar();
+		toolbar.setTitle(R.string.app_name);
+		toolbar.inflateMenu(R.menu.menu_home);
+		toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+			@Override
+			public boolean onMenuItemClick(MenuItem item) {
+				switch (item.getItemId()) {
+					case R.id.menu_settings:
+						replaceFragment(SettingsFragment.class, true, null);
+						return true;
+				}
+
+				return false;
+			}
+		});
 	}
 
 	@Override
