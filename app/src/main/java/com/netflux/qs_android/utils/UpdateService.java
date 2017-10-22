@@ -10,7 +10,6 @@ import android.net.ConnectivityManager;
 import android.os.Binder;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
-import android.support.v4.util.Pair;
 import android.util.Log;
 
 import com.neovisionaries.ws.client.WebSocket;
@@ -129,10 +128,11 @@ public class UpdateService extends Service {
 			_isUpdating = true;
 			notifyStartUpdate();
 
-			Pair<Long, List<Ticket>> result = _networkManager.getAllTickets();
+			long timestamp = System.currentTimeMillis();
+			List<Ticket> result = _networkManager.getAllTickets();
 
-			if (result != null && result.second.size() > 0) {
-				_ticketModel.addOrUpdateSync(result.second);
+			if (result != null && result.size() > 0) {
+				_ticketModel.addOrUpdateSync(result);
 
 				Ticket currentTicket = _ticketModel.getCurrentSync();
 				Ticket servingTicket = _ticketModel.getServingSync();
@@ -143,7 +143,7 @@ public class UpdateService extends Service {
 						currentTicket != null ? currentTicket.getId() : -1);
 				editor.putLong(Constants.Prefs.TICKET_SERVING_ID,
 						servingTicket != null ? servingTicket.getId() : -1);
-				editor.putLong(Constants.Prefs.LAST_ID, result.first);
+				editor.putLong(Constants.Prefs.LAST_FETCH, timestamp);
 				editor.apply();
 			}
 

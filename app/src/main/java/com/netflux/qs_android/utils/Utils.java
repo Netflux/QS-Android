@@ -3,7 +3,6 @@ package com.netflux.qs_android.utils;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
-import android.support.v4.util.Pair;
 import android.util.JsonReader;
 import android.util.JsonToken;
 
@@ -12,6 +11,8 @@ import com.netflux.qs_android.data.pojos.Ticket;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -37,10 +38,31 @@ public final class Utils {
 		return uuid;
 	}
 
+	public static String getRandomString() {
+		byte[] salt = new byte[16];
+		SecureRandom random;
+		try {
+			random = SecureRandom.getInstance("SHA1PRNG");
+		} catch (NoSuchAlgorithmException e) {
+			random = new SecureRandom();
+		}
+		random.nextBytes(salt);
+
+		String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890-_";
+		StringBuilder builder = new StringBuilder();
+
+		for (byte s : salt) {
+			Double index = Math.floor((double) (s + 128) / 255 * (characters.length() - 1));
+			builder.append(characters.charAt(index.intValue()));
+		}
+		builder.append(String.valueOf(System.currentTimeMillis()));
+
+		return builder.toString();
+	}
+
 	public static final class Json {
 
-		public static Pair<Long, List<Ticket>> readJsonTickets(InputStream in) throws IOException {
-			long lastID = -1;
+		public static List<Ticket> readJsonTickets(InputStream in) throws IOException {
 			List<Ticket> tickets = new ArrayList<>();
 
 			try (JsonReader reader = new JsonReader(new InputStreamReader(in, "UTF-8"))) {
@@ -48,9 +70,7 @@ public final class Utils {
 				while (reader.hasNext()) {
 					String name = reader.nextName();
 
-					if (name.equals("lastID")) {
-						lastID = reader.nextLong();
-					} else if (name.equals("data")) {
+					if (name.equals("data")) {
 						reader.beginArray();
 						while (reader.hasNext()) {
 							tickets.add(readJsonTicket(reader));
@@ -62,7 +82,7 @@ public final class Utils {
 				}
 				reader.endObject();
 
-				return new Pair<>(lastID, tickets);
+				return tickets;
 			}
 		}
 
@@ -87,10 +107,11 @@ public final class Utils {
 		private static Ticket readJsonTicket(JsonReader reader) throws IOException {
 			long id = -1;
 			String key = null;
+			String secret = null;
 			long time_created = -1;
 			long time_served = -1;
 			long duration = -1;
-			boolean cancelled = false;
+			int status = 0;
 
 			reader.beginObject();
 			while (reader.hasNext()) {
@@ -100,21 +121,23 @@ public final class Utils {
 					id = reader.nextLong();
 				} else if (name.equals("key")) {
 					key = reader.nextString();
+				} else if (name.equals("secret")) {
+					secret = reader.nextString();
 				} else if (name.equals("time_created")) {
 					time_created = reader.nextLong();
 				} else if (name.equals("time_served") && reader.peek() != JsonToken.NULL) {
 					time_served = reader.nextLong();
 				} else if (name.equals("duration") && reader.peek() != JsonToken.NULL) {
 					duration = reader.nextLong();
-				} else if (name.equals("cancelled")) {
-					cancelled = reader.nextBoolean();
+				} else if (name.equals("status")) {
+					status = reader.nextInt();
 				} else {
 					reader.skipValue();
 				}
 			}
 			reader.endObject();
 
-			return new Ticket(id, key, time_created, time_served, duration, cancelled);
+			return new Ticket(id, key, secret, time_created, time_served, duration, status);
 		}
 
 	}

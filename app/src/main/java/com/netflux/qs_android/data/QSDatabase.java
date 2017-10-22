@@ -25,10 +25,11 @@ public class QSDatabase extends BaseDB {
 				"CREATE TABLE IF NOT EXISTS " + TicketContract.TABLE + " (\n" +
 						"\t" + TicketContract._ID + " INTEGER PRIMARY KEY ,\n" +
 						"\t" + TicketContract.COL_KEY + " TEXT NOT NULL,\n" +
+						"\t" + TicketContract.COL_SECRET + " TEXT,\n" +
 						"\t" + TicketContract.COL_TIME_CREATED + " UNSIGNED INTEGER NOT NULL,\n" +
 						"\t" + TicketContract.COL_TIME_SERVED + " UNSIGNED INTEGER,\n" +
 						"\t" + TicketContract.COL_DURATION + " UNSIGNED INTEGER,\n" +
-						"\t" + TicketContract.COL_CANCELLED + " BOOLEAN NOT NULL\n" +
+						"\t" + TicketContract.COL_STATUS + " UNSIGNED INTEGER NOT NULL\n" +
 						")"
 		};
 	}

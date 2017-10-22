@@ -21,10 +21,11 @@ public class TicketModel extends BaseDBModel<Ticket> {
 	private static final String[] DEFAULT_COL_PROJECTION = new String[] {
 			TicketContract._ID,
 			TicketContract.COL_KEY,
+			TicketContract.COL_SECRET,
 			TicketContract.COL_TIME_CREATED,
 			TicketContract.COL_TIME_SERVED,
 			TicketContract.COL_DURATION,
-			TicketContract.COL_CANCELLED
+			TicketContract.COL_STATUS
 	};
 
 	private static final String DEFAULT_SORT_ORDER = TicketContract._ID;
@@ -43,6 +44,9 @@ public class TicketModel extends BaseDBModel<Ticket> {
 
 		contentValues.put(TicketContract._ID, ticket.getId());
 		contentValues.put(TicketContract.COL_KEY, ticket.getKey());
+		if (ticket.getSecret() != null) {
+			contentValues.put(TicketContract.COL_SECRET, ticket.getSecret());
+		}
 		contentValues.put(TicketContract.COL_TIME_CREATED, ticket.getTimeCreated());
 		if (ticket.getTimeServed() != -1) {
 			contentValues.put(TicketContract.COL_TIME_SERVED, ticket.getTimeServed());
@@ -50,9 +54,13 @@ public class TicketModel extends BaseDBModel<Ticket> {
 		if (ticket.getDuration() != -1) {
 			contentValues.put(TicketContract.COL_DURATION, ticket.getDuration());
 		}
-		contentValues.put(TicketContract.COL_CANCELLED, ticket.getCancelled());
+		contentValues.put(TicketContract.COL_STATUS, ticket.getStatus());
 
-		db.insertWithOnConflict(TicketContract.TABLE, null, contentValues, SQLiteDatabase.CONFLICT_REPLACE);
+		String whereClause = TicketContract._ID + " = ?";
+		String[] whereArgs = { String.valueOf(ticket.getId()) };
+
+		db.updateWithOnConflict(TicketContract.TABLE, contentValues, whereClause, whereArgs, SQLiteDatabase.CONFLICT_IGNORE);
+		db.insertWithOnConflict(TicketContract.TABLE, null, contentValues, SQLiteDatabase.CONFLICT_IGNORE);
 
 		notifyUpdated(ticket);
 	}
@@ -112,10 +120,8 @@ public class TicketModel extends BaseDBModel<Ticket> {
 		SQLiteDatabase db = getDBOpenHelper().getReadableDatabase();
 
 		String whereClause = TicketContract.COL_KEY + " = ? AND " +
-				TicketContract.COL_TIME_SERVED + " IS NULL AND " +
-				TicketContract.COL_DURATION + " IS NULL AND " +
-				TicketContract.COL_CANCELLED + " = 0";
-		String[] whereArgs = { Utils.getUUID(_context) };
+				TicketContract.COL_STATUS + " IN (?, ?)";
+		String[] whereArgs = { Utils.getUUID(_context), String.valueOf(Ticket.STATUS_PENDING), String.valueOf(Ticket.STATUS_SERVING) };
 
 		Cursor c = db.query(
 				TicketContract.TABLE,
@@ -138,15 +144,14 @@ public class TicketModel extends BaseDBModel<Ticket> {
 	public Ticket getServingSync() {
 		SQLiteDatabase db = getDBOpenHelper().getReadableDatabase();
 
-		String whereClause = TicketContract.COL_TIME_SERVED + " IS NULL AND " +
-				TicketContract.COL_DURATION + " IS NULL AND " +
-				TicketContract.COL_CANCELLED + " = 0";
+		String whereClause = TicketContract.COL_STATUS + " = ?";
+		String[] whereArgs = { String.valueOf(Ticket.STATUS_SERVING) };
 
 		Cursor c = db.query(
 				TicketContract.TABLE,
 				DEFAULT_COL_PROJECTION,
 				whereClause,
-				null,
+				whereArgs,
 				null,
 				null,
 				DEFAULT_SORT_ORDER
@@ -168,10 +173,11 @@ public class TicketModel extends BaseDBModel<Ticket> {
 						new Ticket(
 								c.getLong(c.getColumnIndexOrThrow(TicketContract._ID)),
 								c.getString(c.getColumnIndexOrThrow(TicketContract.COL_KEY)),
+								c.getString(c.getColumnIndexOrThrow(TicketContract.COL_SECRET)),
 								c.getLong(c.getColumnIndexOrThrow(TicketContract.COL_TIME_CREATED)),
 								c.getLong(c.getColumnIndexOrThrow(TicketContract.COL_TIME_SERVED)),
 								c.getLong(c.getColumnIndexOrThrow(TicketContract.COL_DURATION)),
-								c.getInt(c.getColumnIndexOrThrow(TicketContract.COL_CANCELLED)) == 1
+								c.getInt(c.getColumnIndexOrThrow(TicketContract.COL_STATUS))
 						)
 				);
 			} while (c.moveToNext());

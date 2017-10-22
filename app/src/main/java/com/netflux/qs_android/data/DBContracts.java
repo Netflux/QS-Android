@@ -16,10 +16,11 @@ public final class DBContracts {
 
 		public static final String TABLE = "Ticket";
 		public static final String COL_KEY = "key";
+		public static final String COL_SECRET = "secret";
 		public static final String COL_TIME_CREATED = "time_created";
 		public static final String COL_TIME_SERVED = "time_served";
 		public static final String COL_DURATION = "duration";
-		public static final String COL_CANCELLED = "cancelled";
+		public static final String COL_STATUS = "status";
 
 	}
 

@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
-import android.support.v4.util.Pair;
 import android.util.Log;
 
 import com.netflux.qs_android.data.pojos.Ticket;
@@ -31,14 +30,14 @@ public class NetworkManager {
 	}
 
 	@Nullable
-	public Pair<Long, List<Ticket>> getAllTickets() {
+	public List<Ticket> getAllTickets() {
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(_context);
-		long lastID = prefs.getLong(Constants.Prefs.LAST_ID, -1);
+		long lastFetch = prefs.getLong(Constants.Prefs.LAST_FETCH, 0);
 		HttpURLConnection conn = null;
 		InputStream in = null;
 
 		try {
-			conn = buildConnection(Constants.SERVER_URL + "/api/tickets?lastID=" + lastID, "GET");
+			conn = buildConnection(Constants.SERVER_URL + "/api/tickets?timestamp=" + lastFetch, "GET");
 			in = conn.getInputStream();
 
 			return Utils.Json.readJsonTickets(in);
@@ -65,6 +64,7 @@ public class NetworkManager {
 		JSONObject payload = new JSONObject();
 		try {
 			payload.put("key", Utils.getUUID(_context));
+			payload.put("secret", Utils.getRandomString());
 		} catch (JSONException e) {
 			Log.e(TAG, e.toString());
 			return null;
@@ -111,6 +111,7 @@ public class NetworkManager {
 		JSONObject payload = new JSONObject();
 		try {
 			payload.put("key", Utils.getUUID(_context));
+			payload.put("secret", ticket.getSecret());
 		} catch (JSONException e) {
 			Log.e(TAG, e.toString());
 			return false;

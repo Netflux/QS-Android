@@ -9,29 +9,37 @@ import android.os.Parcelable;
  */
 public class Ticket implements Parcelable {
 
+	public static final int STATUS_CANCELLED = 0;
+	public static final int STATUS_PENDING = 1;
+	public static final int STATUS_SERVING = 2;
+	public static final int STATUS_SERVED = 3;
+
 	private long _id;
 	private String _key;
+	private String _secret;
 	private long _timeCreated;
 	private long _timeServed;
 	private long _duration;
-	private boolean _cancelled;
+	private int _status;
 
-	public Ticket(long id, String key, long timeCreated, long timeServed, long duration, boolean cancelled) {
+	public Ticket(long id, String key, String secret, long timeCreated, long timeServed, long duration, int status) {
 		_id = id;
 		_key = key;
+		_secret = secret;
 		_timeCreated = timeCreated;
 		_timeServed = timeServed;
 		_duration = duration;
-		_cancelled = cancelled;
+		_status = status;
 	}
 
 	protected Ticket(Parcel in) {
 		_id = in.readLong();
 		_key = in.readString();
+		_secret = in.readString();
 		_timeCreated = in.readLong();
 		_timeServed = in.readLong();
 		_duration = in.readLong();
-		_cancelled = in.readByte() != 0;
+		_status = in.readInt();
 	}
 
 	public long getId() {
@@ -40,6 +48,10 @@ public class Ticket implements Parcelable {
 
 	public String getKey() {
 		return _key;
+	}
+
+	public String getSecret() {
+		return _secret;
 	}
 
 	public long getTimeCreated() {
@@ -54,8 +66,8 @@ public class Ticket implements Parcelable {
 		return _duration;
 	}
 
-	public boolean getCancelled() {
-		return _cancelled;
+	public int getStatus() {
+		return _status;
 	}
 
 	public static final Creator<Ticket> CREATOR = new Creator<Ticket>() {
@@ -79,9 +91,10 @@ public class Ticket implements Parcelable {
 	public void writeToParcel(Parcel dest, int flags) {
 		dest.writeLong(_id);
 		dest.writeString(_key);
+		dest.writeString(_secret);
 		dest.writeLong(_timeCreated);
 		dest.writeLong(_timeServed);
 		dest.writeLong(_duration);
-		dest.writeByte((byte) (_cancelled ? 1 : 0));
+		dest.writeInt(_status);
 	}
 }
