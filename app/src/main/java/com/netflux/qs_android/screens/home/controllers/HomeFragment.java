@@ -107,7 +107,7 @@ public class HomeFragment extends BaseFragment implements
 
 				if (id == -1) {
 					// Fetch a new ticket from the server
-					final Ticket ticket = _networkManager.getNewTicket();
+					Ticket ticket = _networkManager.getNewTicket();
 
 					if (ticket != null) {
 						SharedPreferences.Editor editor = _prefs.edit();

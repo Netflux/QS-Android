@@ -121,7 +121,11 @@ public class TicketModel extends BaseDBModel<Ticket> {
 
 		String whereClause = TicketContract.COL_KEY + " = ? AND " +
 				TicketContract.COL_STATUS + " IN (?, ?)";
-		String[] whereArgs = { Utils.getUUID(_context), String.valueOf(Ticket.STATUS_PENDING), String.valueOf(Ticket.STATUS_SERVING) };
+		String[] whereArgs = {
+				Utils.getUUID(_context),
+				String.valueOf(Ticket.STATUS_PENDING),
+				String.valueOf(Ticket.STATUS_SERVING)
+		};
 
 		Cursor c = db.query(
 				TicketContract.TABLE,
@@ -130,7 +134,8 @@ public class TicketModel extends BaseDBModel<Ticket> {
 				whereArgs,
 				null,
 				null,
-				DEFAULT_SORT_ORDER
+				DEFAULT_SORT_ORDER,
+				"1"
 		);
 
 		List<Ticket> result = extractFromCursor(c);
@@ -154,7 +159,8 @@ public class TicketModel extends BaseDBModel<Ticket> {
 				whereArgs,
 				null,
 				null,
-				DEFAULT_SORT_ORDER
+				DEFAULT_SORT_ORDER,
+				"1"
 		);
 
 		List<Ticket> result = extractFromCursor(c);
@@ -162,6 +168,62 @@ public class TicketModel extends BaseDBModel<Ticket> {
 		if (c != null) c.close();
 
 		return result.size() == 0 ? null : result.get(0);
+	}
+
+	@Nullable
+	public Ticket getNextSync() {
+		SQLiteDatabase db = getDBOpenHelper().getReadableDatabase();
+
+		String whereClause = TicketContract.COL_STATUS + " IN (?, ?)";
+		String[] whereArgs = {
+				String.valueOf(Ticket.STATUS_PENDING),
+				String.valueOf(Ticket.STATUS_SERVING)
+		};
+
+		Cursor c = db.query(
+				TicketContract.TABLE,
+				DEFAULT_COL_PROJECTION,
+				whereClause,
+				whereArgs,
+				null,
+				null,
+				DEFAULT_SORT_ORDER,
+				"1"
+		);
+
+		List<Ticket> result = extractFromCursor(c);
+
+		if (c != null) c.close();
+
+		return result.size() == 0 ? null : result.get(0);
+	}
+
+	public int getRemainingCountSync(long currentId) {
+		SQLiteDatabase db = getDBOpenHelper().getReadableDatabase();
+
+		String whereClause = TicketContract._ID + " < ? AND " +
+				TicketContract.COL_STATUS + " IN (?, ?)";
+		String[] whereArgs = {
+				String.valueOf(currentId),
+				String.valueOf(Ticket.STATUS_PENDING),
+				String.valueOf(Ticket.STATUS_SERVING)
+		};
+
+		Cursor c = db.query(
+				TicketContract.TABLE,
+				DEFAULT_COL_PROJECTION,
+				whereClause,
+				whereArgs,
+				null,
+				null,
+				DEFAULT_SORT_ORDER
+		);
+
+		List<Ticket> result = extractFromCursor(c);
+
+		if (c != null) c.close();
+
+		return result.size();
 	}
 
 	public List<Ticket> extractFromCursor(Cursor c) {

@@ -15,11 +15,10 @@ import android.view.View;
 import com.netflux.adp.ui.controller.BasePreferenceFragment;
 import com.netflux.qs_android.R;
 import com.netflux.qs_android.screens.common.controllers.MainActivity;
+import com.netflux.qs_android.utils.Constants;
 
 
 public class SettingsFragment extends BasePreferenceFragment {
-
-	private static final String DEFAULT_NOTIFICATION_URI = "content://settings/system/notification_sound";
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -45,7 +44,7 @@ public class SettingsFragment extends BasePreferenceFragment {
 		String path = prefs.getString(getString(R.string.prefs_notificationTone), null);
 
 		if (path == null) {
-			path = DEFAULT_NOTIFICATION_URI;
+			path = Constants.DEFAULT_NOTIFICATION_URI;
 			SharedPreferences.Editor editor = prefs.edit();
 			editor.putString(getString(R.string.prefs_notificationTone), path);
 			editor.apply();
@@ -66,7 +65,7 @@ public class SettingsFragment extends BasePreferenceFragment {
 
 		if (key.equals(getString(R.string.prefs_notificationTone))) {
 			SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
-			String path = prefs.getString(getString(R.string.prefs_notificationTone), DEFAULT_NOTIFICATION_URI);
+			String path = prefs.getString(getString(R.string.prefs_notificationTone), Constants.DEFAULT_NOTIFICATION_URI);
 			Uri uri = Uri.parse(path);
 
 			Intent intent = new Intent(RingtoneManager.ACTION_RINGTONE_PICKER);
@@ -89,7 +88,7 @@ public class SettingsFragment extends BasePreferenceFragment {
 		}
 
 		Uri uri = data.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI);
-		String path = DEFAULT_NOTIFICATION_URI;
+		String path = Constants.DEFAULT_NOTIFICATION_URI;
 
 		if (uri != null) {
 			path = uri.toString();

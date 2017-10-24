@@ -13,6 +13,8 @@ public final class Constants {
 	public static final String SERVER_URL = "http://127.0.0.1";
 	public static final String SERVER_URL_WS = "ws://127.0.0.1";
 
+	public static final String DEFAULT_NOTIFICATION_URI = "content://settings/system/notification_sound";
+
 	public static final class Prefs {
 
 		public static final String UUID = "PREFS_UUID";
