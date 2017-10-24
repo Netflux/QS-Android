@@ -19,8 +19,6 @@ public final class Constants {
 
 		public static final String UUID = "PREFS_UUID";
 		public static final String LAST_FETCH = "PREFS_LAST_FETCH";
-		public static final String TICKET_CURRENT_ID = "PREFS_TICKET_CURRENT_ID";
-		public static final String TICKET_SERVING_ID = "PREFS_TICKET_SERVING_ID";
 
 	}
 

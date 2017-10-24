@@ -134,15 +134,8 @@ public class UpdateService extends Service {
 			if (result != null && result.size() > 0) {
 				_ticketModel.addOrUpdateSync(result);
 
-				Ticket currentTicket = _ticketModel.getCurrentSync();
-				Ticket servingTicket = _ticketModel.getServingSync();
-
 				SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 				SharedPreferences.Editor editor = prefs.edit();
-				editor.putLong(Constants.Prefs.TICKET_CURRENT_ID,
-						currentTicket != null ? currentTicket.getId() : -1);
-				editor.putLong(Constants.Prefs.TICKET_SERVING_ID,
-						servingTicket != null ? servingTicket.getId() : -1);
 				editor.putLong(Constants.Prefs.LAST_FETCH, timestamp);
 				editor.apply();
 			}

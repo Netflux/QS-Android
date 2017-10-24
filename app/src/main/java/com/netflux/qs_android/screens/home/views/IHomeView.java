@@ -1,6 +1,9 @@
 package com.netflux.qs_android.screens.home.views;
 
+import android.support.annotation.Nullable;
+
 import com.netflux.adp.ui.view.IBaseView;
+import com.netflux.qs_android.data.pojos.Ticket;
 
 
 public interface IHomeView extends IBaseView {
@@ -15,16 +18,12 @@ public interface IHomeView extends IBaseView {
 	}
 
 	/**
-	 * Set the number for the currently active ticket.
-	 * @param number The number (as string).
+	 * Bind the ticket data to the UI.
+	 * @param currentTicket - The current ticket.
+	 * @param servingTicket - The serving ticket.
+	 * @param nextTicket - The next ticket.
 	 */
-	void setTicketNumber(long number);
-
-	/**
-	 * Set the number for the ticket being served.
-	 * @param number The number (as string).
-	 */
-	void setServingNumber(long number);
+	void bindData(@Nullable Ticket currentTicket, @Nullable Ticket servingTicket, @Nullable Ticket nextTicket);
 
 	/**
 	 * Toggle the "Handle Ticket" button mode.

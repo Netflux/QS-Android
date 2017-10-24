@@ -27,6 +27,7 @@
             android:textStyle="bold"/>
 
         <TextView
+            android:id="@+id/label_serveOrNext"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingTop="16dp"
@@ -35,7 +36,7 @@
             android:textSize="16sp"/>
 
         <TextView
-            android:id="@+id/text_curServing"
+            android:id="@+id/text_serveOrNext"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textAlignment="center"

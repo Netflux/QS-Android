@@ -1,6 +1,7 @@
 package com.netflux.qs_android.utils;
 
 import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.ComponentName;
@@ -13,7 +14,6 @@ import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v7.app.NotificationCompat;
 
-import com.netflux.adp.util.BackgroundThreadPoster;
 import com.netflux.qs_android.App;
 import com.netflux.qs_android.R;
 import com.netflux.qs_android.data.models.TicketModel;
@@ -37,11 +37,13 @@ public class NotificationService extends Service implements UpdateService.Update
 		}
 	};
 
+	private static final int NOTIFICATION_ID = 1;
+
 	private UpdateService _updateService;
 	private SharedPreferences _prefs;
 	private TicketModel _ticketModel;
 
-	private final int NOTIFICATION_ID = 1;
+	private boolean _isForeground = false;
 
 	@Override
 	public void onCreate() {
@@ -84,14 +86,20 @@ public class NotificationService extends Service implements UpdateService.Update
 		handleNotification();
 	}
 
-	public Notification buildNotification(long currentTicketID, long servingTicketID, long nextTicketID, int remainingCount) {
+	public Notification buildNotification(long currentTicketID) {
+		Ticket servingTicket = _ticketModel.getServingSync();
+		Ticket nextTicket = _ticketModel.getNextSync();
+		long servingTicketID = servingTicket != null ? servingTicket.getId() : -1;
+		long nextTicketID = nextTicket != null ? nextTicket.getId() : -1;
+		int remainingCount = _ticketModel.getRemainingCountSync(currentTicketID);
+
 		Intent intent = new Intent(this, MainActivity.class);
 		PendingIntent pendingIntent =
 				PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
 		NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
 
-		if (remainingCount <= 3 && servingTicketID != -1 && currentTicketID != servingTicketID) {
+		if (currentTicketID == -1 || (remainingCount <= 3 && servingTicketID != -1)) {
 			Uri tone = Uri.parse(_prefs.getString(getString(R.string.prefs_notificationTone), Constants.DEFAULT_NOTIFICATION_URI));
 			String vibration = _prefs.getString(getString(R.string.prefs_vibrate), "1");
 			long[] pattern = new long[] { 0, 0 };
@@ -114,13 +122,32 @@ public class NotificationService extends Service implements UpdateService.Update
 
 		return builder
 				.setSmallIcon(R.mipmap.ic_launcher)
-				.setContentTitle(getString(R.string.label_yourNumber) + " " + currentTicketID)
-				.setContentText(buildNotificationText(servingTicketID, nextTicketID, remainingCount))
+				.setContentTitle(buildNotificationTitle(currentTicketID))
+				.setContentText(buildNotificationText(currentTicketID, servingTicketID, nextTicketID, remainingCount))
 				.setContentIntent(pendingIntent)
+				.setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+				.setAutoCancel(currentTicketID == -1)
 				.build();
 	}
 
-	private String buildNotificationText(long servingTicketID, long nextTicketID, int remainingCount) {
+	private String buildNotificationTitle(long currentTicketID) {
+		StringBuilder contentTitle = new StringBuilder();
+
+		if (currentTicketID != -1) {
+			contentTitle.append(getString(R.string.label_yourNumber)).append(" ").append(currentTicketID);
+		} else {
+			contentTitle.append(getString(R.string.label_servedOrCancelled));
+		}
+
+		return contentTitle.toString();
+	}
+
+	@Nullable
+	private String buildNotificationText(long currentTicketID, long servingTicketID, long nextTicketID, int remainingCount) {
+		if (currentTicketID == -1) {
+			return null;
+		}
+
 		StringBuilder contentText = new StringBuilder();
 		if (servingTicketID != -1) {
 			contentText.append(getString(R.string.label_curServing)).append(" ").append(servingTicketID);
@@ -139,22 +166,22 @@ public class NotificationService extends Service implements UpdateService.Update
 	}
 
 	public void handleNotification() {
-		final long currentTicketID = _prefs.getLong(Constants.Prefs.TICKET_CURRENT_ID, -1);
-		final long servingTicketID = _prefs.getLong(Constants.Prefs.TICKET_SERVING_ID, -1);
+		Ticket currentTicket = _ticketModel.getCurrentSync();
 
-		if (currentTicketID == -1) {
-			stopForeground(true);
+		if (currentTicket == null) {
+			if (_isForeground) {
+				stopForeground(true);
+				_isForeground = false;
+
+				NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+				Notification notification = buildNotification(-1);
+				notificationManager.notify(NOTIFICATION_ID, notification);
+			}
+
 			stopSelf();
 		} else {
-			BackgroundThreadPoster.getInstance().post(new Runnable() {
-				@Override
-				public void run() {
-					Ticket nextTicket = _ticketModel.getNextSync();
-					long nextTicketID = nextTicket != null ? nextTicket.getId() : -1;
-					int remainingCount = _ticketModel.getRemainingCountSync(currentTicketID);
-					startForeground(NOTIFICATION_ID, buildNotification(currentTicketID, servingTicketID, nextTicketID, remainingCount));
-				}
-			});
+			startForeground(NOTIFICATION_ID, buildNotification(currentTicket.getId()));
+			_isForeground = true;
 
 			Intent serviceIntent = new Intent(this, UpdateService.class);
 			bindService(serviceIntent, _serviceConnection, BIND_AUTO_CREATE);

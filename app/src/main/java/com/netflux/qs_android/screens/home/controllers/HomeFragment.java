@@ -4,10 +4,8 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
@@ -26,7 +24,6 @@ import com.netflux.qs_android.screens.common.controllers.MainActivity;
 import com.netflux.qs_android.screens.home.views.HomeView;
 import com.netflux.qs_android.screens.home.views.IHomeView;
 import com.netflux.qs_android.screens.settings.controllers.SettingsFragment;
-import com.netflux.qs_android.utils.Constants;
 import com.netflux.qs_android.utils.NetworkManager;
 import com.netflux.qs_android.utils.UpdateService;
 
@@ -51,7 +48,6 @@ public class HomeFragment extends BaseFragment implements
 
 	private HomeView _view;
 
-	private SharedPreferences _prefs;
 	private NetworkManager _networkManager;
 	private TicketModel _ticketModel;
 	private UpdateService _updateService;
@@ -71,7 +67,6 @@ public class HomeFragment extends BaseFragment implements
 	public void onActivityCreated(@Nullable Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
 
-		_prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
 		_networkManager = ((App) getActivity().getApplication()).getNetworkManager();
 		_ticketModel = ((App) getActivity().getApplication()).getTicketModel();
 
@@ -103,27 +98,19 @@ public class HomeFragment extends BaseFragment implements
 		BackgroundThreadPoster.getInstance().post(new Runnable() {
 			@Override
 			public void run() {
-				long id = _prefs.getLong(Constants.Prefs.TICKET_CURRENT_ID, -1);
+				Ticket currentTicket = _ticketModel.getCurrentSync();
 
-				if (id == -1) {
+				if (currentTicket == null) {
 					// Fetch a new ticket from the server
 					Ticket ticket = _networkManager.getNewTicket();
 
 					if (ticket != null) {
-						SharedPreferences.Editor editor = _prefs.edit();
-						editor.putLong(Constants.Prefs.TICKET_CURRENT_ID, ticket.getId());
-						editor.apply();
-
 						_ticketModel.addOrUpdateSync(ticket);
 					}
 				} else {
 					// Cancel the current ticket on the server
-					Ticket ticket = _ticketModel.getSync(id);
-
-					if (ticket != null && _networkManager.cancelTicket(ticket)) {
-						SharedPreferences.Editor editor = _prefs.edit();
-						editor.putLong(Constants.Prefs.TICKET_CURRENT_ID, -1);
-						editor.apply();
+					if (!_networkManager.cancelTicket(currentTicket)) {
+						// TODO - Show failure message
 					}
 				}
 
@@ -139,12 +126,12 @@ public class HomeFragment extends BaseFragment implements
 	}
 
 	private void updateTicketDisplay() {
-		long currentTicketID = _prefs.getLong(Constants.Prefs.TICKET_CURRENT_ID, -1);
-		long servingTicketID = _prefs.getLong(Constants.Prefs.TICKET_SERVING_ID, -1);
+		Ticket currentTicket = _ticketModel.getCurrentSync();
+		Ticket servingTicket = _ticketModel.getServingSync();
+		Ticket nextTicket = _ticketModel.getNextSync();
 
-		_view.setTicketNumber(currentTicketID);
-		_view.setServingNumber(servingTicketID);
-		_view.toggleTicketButtonMode(currentTicketID != -1);
+		_view.bindData(currentTicket, servingTicket, nextTicket);
+		_view.toggleTicketButtonMode(currentTicket != null);
 	}
 
 	private void setupToolbar() {
