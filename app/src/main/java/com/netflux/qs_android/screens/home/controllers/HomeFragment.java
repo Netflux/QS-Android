@@ -4,9 +4,12 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -16,6 +19,7 @@ import android.view.ViewGroup;
 import com.netflux.adp.ui.controller.BaseFragment;
 import com.netflux.adp.util.BackgroundThreadPoster;
 import com.netflux.adp.util.MainThreadPoster;
+import com.netflux.adp.util.NetworkUtil;
 import com.netflux.qs_android.App;
 import com.netflux.qs_android.R;
 import com.netflux.qs_android.data.models.TicketModel;
@@ -24,6 +28,7 @@ import com.netflux.qs_android.screens.common.controllers.MainActivity;
 import com.netflux.qs_android.screens.home.views.HomeView;
 import com.netflux.qs_android.screens.home.views.IHomeView;
 import com.netflux.qs_android.screens.settings.controllers.SettingsFragment;
+import com.netflux.qs_android.utils.Constants;
 import com.netflux.qs_android.utils.NetworkManager;
 import com.netflux.qs_android.utils.UpdateService;
 
@@ -37,6 +42,7 @@ public class HomeFragment extends BaseFragment implements
 		public void onServiceConnected(ComponentName name, IBinder service) {
 			_updateService = ((UpdateService.UpdateServiceBinder) service).getService();
 			_updateService.registerListener(HomeFragment.this);
+			_updateService.handleUpdate();
 		}
 
 		@Override
@@ -98,40 +104,54 @@ public class HomeFragment extends BaseFragment implements
 		BackgroundThreadPoster.getInstance().post(new Runnable() {
 			@Override
 			public void run() {
-				Ticket currentTicket = _ticketModel.getCurrentSync();
-
-				if (currentTicket == null) {
-					// Fetch a new ticket from the server
-					Ticket ticket = _networkManager.getNewTicket();
-
-					if (ticket != null) {
-						_ticketModel.addOrUpdateSync(ticket);
-					}
+				if (!NetworkUtil.hasInternetConnection(getActivity())) {
+					Snackbar.make(_view.getRootView(), R.string.error_network, Snackbar.LENGTH_SHORT).show();
 				} else {
-					// Cancel the current ticket on the server
-					if (!_networkManager.cancelTicket(currentTicket)) {
-						// TODO - Show failure message
+					Ticket currentTicket = _ticketModel.getCurrentSync();
+
+					if (currentTicket == null) {
+						// Fetch a new ticket from the server
+						Ticket ticket = _networkManager.getNewTicket();
+
+						if (ticket != null) {
+							_ticketModel.addOrUpdateSync(ticket);
+						}
+					} else {
+						// Cancel the current ticket on the server
+						if (!_networkManager.cancelTicket(currentTicket)) {
+							_updateService.handleUpdate();
+							Snackbar.make(_view.getRootView(), R.string.error_generic, Snackbar.LENGTH_SHORT).show();
+						}
 					}
 				}
-
-				// Update the UI display
-				MainThreadPoster.getInstance().post(new Runnable() {
-					@Override
-					public void run() {
-						updateTicketDisplay();
-					}
-				});
 			}
 		});
 	}
 
 	private void updateTicketDisplay() {
-		Ticket currentTicket = _ticketModel.getCurrentSync();
-		Ticket servingTicket = _ticketModel.getServingSync();
-		Ticket nextTicket = _ticketModel.getNextSync();
+		BackgroundThreadPoster.getInstance().post(new Runnable() {
+			@Override
+			public void run() {
+				SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+				final boolean systemStatus = prefs.getBoolean(Constants.Prefs.SYSTEM_STATUS, false);
+				final Ticket currentTicket = _ticketModel.getCurrentSync();
+				final Ticket servingTicket = _ticketModel.getServingSync();
+				final Ticket nextTicket = _ticketModel.getNextSync();
+				final int remainingCount = currentTicket != null ? _ticketModel.getRemainingCountSync(currentTicket.getId()) : -1;
 
-		_view.bindData(currentTicket, servingTicket, nextTicket);
-		_view.toggleTicketButtonMode(currentTicket != null);
+				MainThreadPoster.getInstance().post(new Runnable() {
+					@Override
+					public void run() {
+						if (systemStatus && remainingCount != -1) {
+							_view.bindData(currentTicket, servingTicket, nextTicket);
+						} else {
+							_view.bindData(systemStatus, remainingCount);
+						}
+						_view.toggleTicketButtonMode(currentTicket != null);
+					}
+				});
+			}
+		});
 	}
 
 	private void setupToolbar() {
@@ -143,6 +163,9 @@ public class HomeFragment extends BaseFragment implements
 			@Override
 			public boolean onMenuItemClick(MenuItem item) {
 				switch (item.getItemId()) {
+					case R.id.menu_refresh:
+						_updateService.handleUpdate();
+						return true;
 					case R.id.menu_settings:
 						replaceFragment(SettingsFragment.class, true, null);
 						return true;
@@ -155,7 +178,7 @@ public class HomeFragment extends BaseFragment implements
 
 	@Override
 	public void onStartUpdate() {
-		// No action required
+		_view.displayProgressBar();
 	}
 
 	@Override

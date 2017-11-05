@@ -9,6 +9,7 @@ android {
         targetSdkVersion 25
         versionCode 1
         versionName '1.0'
+        vectorDrawables.useSupportLibrary = true
     }
     buildTypes {
         release {
@@ -23,10 +24,10 @@ dependencies {
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    compile 'com.android.support:appcompat-v7:25.3.1'
-    compile 'com.android.support:design:25.3.1'
-    compile 'com.android.support:preference-v7:25.3.1'
-    compile 'com.android.support:preference-v14:25.3.1'
+    compile 'com.android.support:appcompat-v7:25.4.0'
+    compile 'com.android.support:design:25.4.0'
+    compile 'com.android.support:preference-v7:25.4.0'
+    compile 'com.android.support:preference-v14:25.4.0'
     compile project(':ADP')
     compile 'com.neovisionaries:nv-websocket-client:2.3'
 }

@@ -131,14 +131,16 @@ public class UpdateService extends Service {
 			long timestamp = System.currentTimeMillis();
 			List<Ticket> result = _networkManager.getAllTickets();
 
+			SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+			SharedPreferences.Editor editor = prefs.edit();
+			editor.putBoolean(Constants.Prefs.SYSTEM_STATUS, _networkManager.getSystemStatus());
+
 			if (result != null && result.size() > 0) {
 				_ticketModel.addOrUpdateSync(result);
-
-				SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-				SharedPreferences.Editor editor = prefs.edit();
 				editor.putLong(Constants.Prefs.LAST_FETCH, timestamp);
-				editor.apply();
 			}
+
+			editor.apply();
 
 			// Start the notification service
 			Intent intent = new Intent(this, NotificationService.class);
@@ -169,10 +171,7 @@ public class UpdateService extends Service {
 
 				@Override
 				public void onTextMessage(WebSocket websocket, String text) throws Exception {
-					if (text.contains(Constants.WebSocket.MSG_TICKETS_CREATED) ||
-							text.contains(Constants.WebSocket.MSG_TICKETS_UPDATED)) {
-						handleUpdate();
-					}
+					handleUpdate();
 				}
 			});
 			_ws.connectAsynchronously();

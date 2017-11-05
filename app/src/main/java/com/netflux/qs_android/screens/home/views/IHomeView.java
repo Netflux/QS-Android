@@ -18,12 +18,24 @@ public interface IHomeView extends IBaseView {
 	}
 
 	/**
+	 * Display the progress bar.
+	 */
+	void displayProgressBar();
+
+	/**
 	 * Bind the ticket data to the UI.
 	 * @param currentTicket - The current ticket.
 	 * @param servingTicket - The serving ticket.
 	 * @param nextTicket - The next ticket.
 	 */
 	void bindData(@Nullable Ticket currentTicket, @Nullable Ticket servingTicket, @Nullable Ticket nextTicket);
+
+	/**
+	 * Bind the system data to the UI.
+	 * @param systemStatus - The system status.
+	 * @param remainingCount - The remaining ticket count.
+	 */
+	void bindData(boolean systemStatus, int remainingCount);
 
 	/**
 	 * Toggle the "Handle Ticket" button mode.

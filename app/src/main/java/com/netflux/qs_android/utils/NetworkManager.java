@@ -140,6 +140,22 @@ public class NetworkManager {
 		}
 	}
 
+	public boolean getSystemStatus() {
+		HttpURLConnection conn = null;
+
+		try {
+			conn = buildConnection(Constants.SERVER_URL + "/api/system", "GET");
+			return conn.getResponseCode() == 200;
+		} catch (IOException e) {
+			Log.e(TAG, e.toString());
+			return false;
+		} finally {
+			if (conn != null) {
+				conn.disconnect();
+			}
+		}
+	}
+
 	/**
 	 * Helper function to build a HTTP URL connection object.
 	 * @param address - The target address.
