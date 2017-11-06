@@ -56,6 +56,7 @@ public class HomeView implements IHomeView {
 		_progressBar.setVisibility(View.VISIBLE);
 		_layout_status.setVisibility(View.GONE);
 		_layout_tickets.setVisibility(View.GONE);
+		_button_handleTicket.setVisibility(View.GONE);
 	}
 
 	@Override
@@ -63,7 +64,6 @@ public class HomeView implements IHomeView {
 		_text_curTicket.setText(currentTicket != null ? String.valueOf(currentTicket.getId()) : "-");
 		_label_serveOrNext.setText(_rootView.getContext().getString(R.string.label_curServing));
 		_text_serveOrNext.setText(servingTicket != null ? String.valueOf(servingTicket.getId()) : "-");
-		_button_handleTicket.setVisibility(View.VISIBLE);
 
 		if (servingTicket == null) {
 			if (nextTicket != null) {
@@ -81,6 +81,7 @@ public class HomeView implements IHomeView {
 		_progressBar.setVisibility(View.GONE);
 		_layout_status.setVisibility(View.GONE);
 		_layout_tickets.setVisibility(View.VISIBLE);
+		_button_handleTicket.setVisibility(View.VISIBLE);
 	}
 
 	@Override

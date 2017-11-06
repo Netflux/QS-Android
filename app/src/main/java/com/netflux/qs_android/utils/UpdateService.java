@@ -15,6 +15,7 @@ import android.util.Log;
 import com.neovisionaries.ws.client.WebSocket;
 import com.neovisionaries.ws.client.WebSocketAdapter;
 import com.neovisionaries.ws.client.WebSocketFactory;
+import com.neovisionaries.ws.client.WebSocketFrame;
 import com.netflux.adp.util.BackgroundThreadPoster;
 import com.netflux.adp.util.MainThreadPoster;
 import com.netflux.adp.util.NetworkUtil;
@@ -172,6 +173,11 @@ public class UpdateService extends Service {
 				@Override
 				public void onTextMessage(WebSocket websocket, String text) throws Exception {
 					handleUpdate();
+				}
+
+				@Override
+				public void onDisconnected(WebSocket websocket, WebSocketFrame serverCloseFrame, WebSocketFrame clientCloseFrame, boolean closedByServer) throws Exception {
+					setupWebSocket();
 				}
 			});
 			_ws.connectAsynchronously();
