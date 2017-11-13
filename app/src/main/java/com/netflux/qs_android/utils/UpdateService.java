@@ -113,14 +113,7 @@ public class UpdateService extends Service {
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		BackgroundThreadPoster.getInstance().post(new Runnable() {
-			@Override
-			public void run() {
-				handleUpdateSync();
-				stopSelf();
-			}
-		});
-
+		handleUpdate();
 		return START_STICKY;
 	}
 
