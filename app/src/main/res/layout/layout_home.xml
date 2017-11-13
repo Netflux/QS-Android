@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                                                 xmlns:app="http://schemas.android.com/apk/res-auto"
                                                  android:layout_width="match_parent"
                                                  android:layout_height="match_parent">
 
@@ -13,7 +14,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_horizontal"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:paddingBottom="16dp">
 
             <ProgressBar
                 android:id="@+id/progressBar"
@@ -105,6 +107,75 @@
                 android:layout_height="2dp"
                 android:layout_marginTop="16dp"
                 android:background="?attr/colorButtonNormal"/>
+
+            <TableLayout
+                android:id="@+id/layout_statistics"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingEnd="16dp"
+                android:paddingStart="16dp">
+
+                <TableRow
+                    android:layout_marginTop="16dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="56dp"
+                        android:layout_height="56dp"
+                        android:layout_marginEnd="16dp"
+                        android:contentDescription="@string/contentDesc_waitTime"
+                        app:srcCompat="@drawable/ic_hourglass"/>
+
+                    <TextView
+                        android:id="@+id/text_waitTime"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="16sp"/>
+
+                </TableRow>
+
+                <TableRow
+                    android:layout_marginTop="16dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="56dp"
+                        android:layout_height="56dp"
+                        android:layout_marginEnd="16dp"
+                        android:contentDescription="@string/contentDesc_remainingTickets"
+                        app:srcCompat="@drawable/ic_ticket"/>
+
+                    <TextView
+                        android:id="@+id/text_remainingTicketCount"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="16sp"/>
+
+                </TableRow>
+
+                <TableRow
+                    android:layout_marginTop="16dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="56dp"
+                        android:layout_height="56dp"
+                        android:layout_marginEnd="16dp"
+                        android:contentDescription="@string/contentDesc_averageDuration"
+                        app:srcCompat="@drawable/ic_stopwatch"/>
+
+                    <TextView
+                        android:id="@+id/text_averageDuration"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="16sp"/>
+
+                </TableRow>
+
+            </TableLayout>
 
         </LinearLayout>
 

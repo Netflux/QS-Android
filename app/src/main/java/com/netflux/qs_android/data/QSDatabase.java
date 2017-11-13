@@ -28,7 +28,7 @@ public class QSDatabase extends BaseDB {
 						"\t" + TicketContract.COL_SECRET + " TEXT,\n" +
 						"\t" + TicketContract.COL_TIME_CREATED + " UNSIGNED INTEGER NOT NULL,\n" +
 						"\t" + TicketContract.COL_TIME_SERVED + " UNSIGNED INTEGER,\n" +
-						"\t" + TicketContract.COL_DURATION + " UNSIGNED INTEGER,\n" +
+						"\t" + TicketContract.COL_DURATION + " UNSIGNED INTEGER NOT NULL,\n" +
 						"\t" + TicketContract.COL_STATUS + " UNSIGNED INTEGER NOT NULL\n" +
 						")"
 		};

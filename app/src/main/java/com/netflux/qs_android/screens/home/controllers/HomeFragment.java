@@ -32,6 +32,8 @@ import com.netflux.qs_android.utils.Constants;
 import com.netflux.qs_android.utils.NetworkManager;
 import com.netflux.qs_android.utils.UpdateService;
 
+import java.util.List;
+
 
 public class HomeFragment extends BaseFragment implements
 		IHomeView.HomeViewListener,
@@ -137,15 +139,16 @@ public class HomeFragment extends BaseFragment implements
 				final Ticket currentTicket = _ticketModel.getCurrentSync();
 				final Ticket servingTicket = _ticketModel.getServingSync();
 				final Ticket nextTicket = _ticketModel.getNextSync();
-				final int remainingCount = currentTicket != null ? _ticketModel.getRemainingCountSync(currentTicket.getId()) : -1;
+				final List<Ticket> remainingTickets = _ticketModel.getRemainingSync();
+				final Bundle statistics = _ticketModel.getStatistics(servingTicket, remainingTickets);
 
 				MainThreadPoster.getInstance().post(new Runnable() {
 					@Override
 					public void run() {
-						if (systemStatus && remainingCount != -1) {
-							_view.bindData(currentTicket, servingTicket, nextTicket);
+						if (systemStatus && remainingTickets.size() > 0) {
+							_view.bindData(currentTicket, servingTicket, nextTicket, statistics);
 						} else {
-							_view.bindData(systemStatus, remainingCount);
+							_view.bindData(systemStatus, statistics);
 						}
 						_view.toggleTicketButtonMode(currentTicket != null);
 					}

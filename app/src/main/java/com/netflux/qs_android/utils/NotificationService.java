@@ -91,7 +91,7 @@ public class NotificationService extends Service implements UpdateService.Update
 		Ticket nextTicket = _ticketModel.getNextSync();
 		long servingTicketID = servingTicket != null ? servingTicket.getId() : -1;
 		long nextTicketID = nextTicket != null ? nextTicket.getId() : -1;
-		int remainingCount = _ticketModel.getRemainingCountSync(currentTicketID);
+		int remainingCount = _ticketModel.getRemainingSync().size() - 1;
 
 		Intent intent = new Intent(this, MainActivity.class);
 		PendingIntent pendingIntent =

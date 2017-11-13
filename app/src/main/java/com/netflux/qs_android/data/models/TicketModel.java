@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.Bundle;
 import android.support.annotation.Nullable;
 
 import com.netflux.adp.data.BaseDBModel;
@@ -13,10 +14,15 @@ import com.netflux.qs_android.data.pojos.Ticket;
 import com.netflux.qs_android.utils.Utils;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 
 public class TicketModel extends BaseDBModel<Ticket> {
+
+	public static final String KEY_WAITING_TIME = "KEY_WAITING_TIME";
+	public static final String KEY_REMAINING_COUNT = "KEY_REMAINING_COUNT";
+	public static final String KEY_DURATION = "KEY_DURATION";
 
 	private static final String[] DEFAULT_COL_PROJECTION = new String[] {
 			TicketContract._ID,
@@ -51,9 +57,7 @@ public class TicketModel extends BaseDBModel<Ticket> {
 		if (ticket.getTimeServed() != -1) {
 			contentValues.put(TicketContract.COL_TIME_SERVED, ticket.getTimeServed());
 		}
-		if (ticket.getDuration() != -1) {
-			contentValues.put(TicketContract.COL_DURATION, ticket.getDuration());
-		}
+		contentValues.put(TicketContract.COL_DURATION, ticket.getDuration());
 		contentValues.put(TicketContract.COL_STATUS, ticket.getStatus());
 
 		String whereClause = TicketContract._ID + " = ?";
@@ -198,13 +202,11 @@ public class TicketModel extends BaseDBModel<Ticket> {
 		return result.size() == 0 ? null : result.get(0);
 	}
 
-	public int getRemainingCountSync(long currentId) {
+	public List<Ticket> getRemainingSync() {
 		SQLiteDatabase db = getDBOpenHelper().getReadableDatabase();
 
-		String whereClause = TicketContract._ID + " < ? AND " +
-				TicketContract.COL_STATUS + " IN (?, ?)";
+		String whereClause = TicketContract.COL_STATUS + " IN (?, ?)";
 		String[] whereArgs = {
-				String.valueOf(currentId),
 				String.valueOf(Ticket.STATUS_PENDING),
 				String.valueOf(Ticket.STATUS_SERVING)
 		};
@@ -223,10 +225,103 @@ public class TicketModel extends BaseDBModel<Ticket> {
 
 		if (c != null) c.close();
 
-		return result.size();
+		return result;
 	}
 
-	public List<Ticket> extractFromCursor(Cursor c) {
+	public Bundle getStatistics(@Nullable Ticket servingTicket, List<Ticket> remainingTickets) {
+		SQLiteDatabase db = getDBOpenHelper().getReadableDatabase();
+		Calendar calendar = Calendar.getInstance();
+		calendar.set(Calendar.HOUR_OF_DAY, 0);
+		calendar.set(Calendar.HOUR, 0);
+		calendar.set(Calendar.MINUTE, 0);
+		calendar.set(Calendar.SECOND, 0);
+
+		String query = "SELECT count(*), avg(" + TicketContract.COL_TIME_SERVED + "-" + TicketContract.COL_TIME_CREATED + "), (SELECT count(*) FROM " +
+				TicketContract.TABLE + " WHERE " + TicketContract.COL_STATUS + " IN (?,?) AND " + TicketContract.COL_KEY + " != ?), avg(" +
+				TicketContract.COL_DURATION + ") FROM " + TicketContract.TABLE + " WHERE " + TicketContract.COL_TIME_SERVED + " IS NOT NULL";
+		String[] whereArgs = {
+				String.valueOf(Ticket.STATUS_PENDING),
+				String.valueOf(Ticket.STATUS_SERVING),
+				Utils.getUUID(_context)
+		};
+
+		long waitingTimeTotal = 0;
+		int remainingCount = 0;
+		long durationTotal = 0;
+		long elapsedTime = 0;
+		int divisor = 0;
+
+		// Statistics for all time
+		try (Cursor c = db.rawQuery(query, whereArgs)) {
+			if (c.moveToFirst() && c.getLong(0) > 0) {
+				waitingTimeTotal = c.getLong(1);
+				remainingCount = c.getInt(2);
+				durationTotal = c.getLong(3);
+				divisor = 1;
+			}
+		}
+
+		// Statistics for current day of week
+		try (Cursor c = db.rawQuery(query + " AND strftime('%w', " + TicketContract.COL_TIME_CREATED + " / 1000, 'unixepoch') = ?", new String[] {
+				String.valueOf(Ticket.STATUS_PENDING),
+				String.valueOf(Ticket.STATUS_SERVING),
+				Utils.getUUID(_context),
+				String.valueOf(calendar.get(Calendar.DAY_OF_WEEK) - 1)
+		})) {
+			if (c.moveToFirst() && c.getLong(0) > 0) {
+				waitingTimeTotal += c.getLong(1) * 4;
+				durationTotal += c.getLong(3) * 4;
+				divisor += 4;
+			}
+		}
+
+		if (remainingTickets.size() > 0) {
+			// Parameters for users ahead in the queue query
+			List<String> params = new ArrayList<>();
+			params.add(String.valueOf(Ticket.STATUS_PENDING));
+			params.add(String.valueOf(Ticket.STATUS_SERVING));
+			params.add(Utils.getUUID(_context));
+			for (Ticket ticket : remainingTickets) {
+				params.add(ticket.getKey());
+			}
+
+			// Statistics for users ahead in the queue
+			try (Cursor c = db.rawQuery(
+					query + " AND " + TicketContract.COL_KEY + " IN (" + Utils.makeQueryPlaceholders(remainingTickets.size()) + ")",
+					params.toArray(new String[params.size()])
+			)) {
+				if (c.moveToFirst() && c.getLong(0) > 0) {
+					waitingTimeTotal += c.getLong(1) * 6;
+					durationTotal += c.getLong(3) * 6;
+					divisor += 6;
+				}
+			}
+		}
+
+		// Statistics for current day
+		try (Cursor c = db.rawQuery(query + " AND " + TicketContract.COL_TIME_CREATED + " > ?", new String[] {
+				String.valueOf(Ticket.STATUS_PENDING),
+				String.valueOf(Ticket.STATUS_SERVING),
+				Utils.getUUID(_context),
+				String.valueOf(calendar.getTimeInMillis())
+		})) {
+			if (c.moveToFirst() && c.getLong(0) > 0) {
+				waitingTimeTotal += c.getLong(1) * 8;
+				durationTotal += c.getLong(3) * 8;
+				divisor += 8;
+			}
+		}
+
+		if (servingTicket != null) { elapsedTime = System.currentTimeMillis() - servingTicket.getTimeServed(); }
+
+		Bundle bundle = new Bundle();
+		bundle.putLong(KEY_WAITING_TIME, Math.max(0, (waitingTimeTotal / Math.max(1, divisor) * Math.max(1, remainingCount)) - elapsedTime));
+		bundle.putInt(KEY_REMAINING_COUNT, remainingCount);
+		bundle.putLong(KEY_DURATION, durationTotal / Math.max(1, divisor));
+		return bundle;
+	}
+
+	private List<Ticket> extractFromCursor(Cursor c) {
 		if (c != null && c.moveToFirst()) {
 			List<Ticket> result = new ArrayList<>(c.getCount());
 

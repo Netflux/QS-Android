@@ -60,6 +60,19 @@ public final class Utils {
 		return builder.toString();
 	}
 
+	public static String makeQueryPlaceholders(int length) {
+		if (length < 1) {
+			throw new RuntimeException("Placeholder length must be 1 or greater");
+		} else {
+			StringBuilder builder = new StringBuilder((length * 2) - 1);
+			builder.append("?");
+			for (int i = 1; i < length; ++i) {
+				builder.append(",?");
+			}
+			return builder.toString();
+		}
+	}
+
 	public static final class Json {
 
 		public static List<Ticket> readJsonTickets(InputStream in) throws IOException {
@@ -110,8 +123,8 @@ public final class Utils {
 			String secret = null;
 			long time_created = -1;
 			long time_served = -1;
-			long duration = -1;
-			int status = 0;
+			long duration = 0;
+			int status = Ticket.STATUS_CANCELLED;
 
 			reader.beginObject();
 			while (reader.hasNext()) {

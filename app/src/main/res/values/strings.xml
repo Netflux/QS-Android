@@ -13,6 +13,9 @@
     <string name="label_servedOrCancelled">Your ticket has been served/cancelled</string>
     <string name="label_allTicketsServed">All tickets served!</string>
     <string name="label_queueClosed">Queue Closed</string>
+    <string name="label_estimatedWaitTime">Estimated Wait Time: %1$s mins(s)</string>
+    <string name="label_remainingTicketCount">Remaining Tickets: %1$d</string>
+    <string name="label_averageDuration">Average Duration: %1$s mins(s)</string>
 
     <string name="label_refresh">Refresh</string>
     <string name="label_settings">Settings</string>
@@ -29,6 +32,9 @@
     <string name="error_network">Unable to connect to the server</string>
 
     <string name="contentDesc_status">System Status Image</string>
+    <string name="contentDesc_waitTime">Wait Time Image</string>
+    <string name="contentDesc_remainingTickets">Remaining Tickets Image</string>
+    <string name="contentDesc_averageDuration">Average Duration Image</string>
 
     <string name="prefs_notificationTone">prefs_notificationTone</string>
     <string name="prefs_vibrate">prefs_vibrate</string>
