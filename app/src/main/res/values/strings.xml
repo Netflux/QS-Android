@@ -13,6 +13,7 @@
     <string name="label_servedOrCancelled">Your ticket has been served/cancelled</string>
     <string name="label_allTicketsServed">All tickets served!</string>
     <string name="label_queueClosed">Queue Closed</string>
+    <string name="label_location">Location: %1$s</string>
     <string name="label_estimatedWaitTime">Estimated Wait Time: %1$s mins(s)</string>
     <string name="label_remainingTicketCount">Remaining Tickets: %1$d</string>
     <string name="label_averageDuration">Average Duration: %1$s mins(s)</string>

@@ -2,6 +2,7 @@ package com.netflux.qs_android.utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.JsonReader;
 import android.util.JsonToken;
@@ -151,6 +152,39 @@ public final class Utils {
 			reader.endObject();
 
 			return new Ticket(id, key, secret, time_created, time_served, duration, status);
+		}
+
+		public static Bundle readJsonSystem(InputStream in) throws IOException {
+			Bundle bundle = new Bundle();
+			try (JsonReader reader = new JsonReader(new InputStreamReader(in, "UTF-8"))) {
+				reader.beginObject();
+				while (reader.hasNext()) {
+					String name = reader.nextName();
+					if (name.equals("data")) {
+						reader.beginObject();
+						while (reader.hasNext()) {
+							String innerName = reader.nextName();
+							switch (innerName) {
+								case "status":
+									bundle.putInt(Constants.Prefs.SYSTEM_STATUS, reader.nextInt());
+									break;
+								case "location":
+									bundle.putString(Constants.Prefs.SYSTEM_LOCATION, reader.nextString());
+									break;
+								default:
+									reader.skipValue();
+									break;
+							}
+						}
+						reader.endObject();
+					} else {
+						reader.skipValue();
+					}
+				}
+				reader.endObject();
+
+				return bundle;
+			}
 		}
 
 	}

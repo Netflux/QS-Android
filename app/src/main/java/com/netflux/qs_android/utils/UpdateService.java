@@ -8,6 +8,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -124,10 +125,14 @@ public class UpdateService extends Service {
 
 			long timestamp = System.currentTimeMillis();
 			List<Ticket> result = _networkManager.getAllTickets();
+			Bundle bundle = _networkManager.getSystemStatus();
 
 			SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 			SharedPreferences.Editor editor = prefs.edit();
-			editor.putBoolean(Constants.Prefs.SYSTEM_STATUS, _networkManager.getSystemStatus());
+			if (bundle != null) {
+				editor.putBoolean(Constants.Prefs.SYSTEM_STATUS, bundle.getInt(Constants.Prefs.SYSTEM_STATUS) == 1);
+				editor.putString(Constants.Prefs.SYSTEM_LOCATION, bundle.getString(Constants.Prefs.SYSTEM_LOCATION));
+			}
 
 			if (result != null && result.size() > 0) {
 				_ticketModel.addOrUpdateSync(result);

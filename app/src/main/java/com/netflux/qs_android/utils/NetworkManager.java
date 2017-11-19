@@ -2,6 +2,7 @@ package com.netflux.qs_android.utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -140,15 +141,23 @@ public class NetworkManager {
 		}
 	}
 
-	public boolean getSystemStatus() {
+	@Nullable
+	public Bundle getSystemStatus() {
 		HttpURLConnection conn = null;
+		InputStream in = null;
 
 		try {
 			conn = buildConnection(Constants.SERVER_URL + "/api/system", "GET");
-			return conn.getResponseCode() == 200;
+
+			if (conn.getResponseCode() == 200) {
+				in = conn.getInputStream();
+				return Utils.Json.readJsonSystem(in);
+			}
+
+			return null;
 		} catch (IOException e) {
 			Log.e(TAG, e.toString());
-			return false;
+			return null;
 		} finally {
 			if (conn != null) {
 				conn.disconnect();

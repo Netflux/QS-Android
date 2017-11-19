@@ -136,6 +136,7 @@ public class HomeFragment extends BaseFragment implements
 			public void run() {
 				SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
 				final boolean systemStatus = prefs.getBoolean(Constants.Prefs.SYSTEM_STATUS, false);
+				final String systemLocation = prefs.getString(Constants.Prefs.SYSTEM_LOCATION, "-");
 				final Ticket currentTicket = _ticketModel.getCurrentSync();
 				final Ticket servingTicket = _ticketModel.getServingSync();
 				final Ticket nextTicket = _ticketModel.getNextSync();
@@ -146,7 +147,7 @@ public class HomeFragment extends BaseFragment implements
 					@Override
 					public void run() {
 						if (systemStatus && remainingTickets.size() > 0) {
-							_view.bindData(currentTicket, servingTicket, nextTicket, statistics);
+							_view.bindData(currentTicket, servingTicket, nextTicket, statistics, systemLocation);
 						} else {
 							_view.bindData(systemStatus, statistics);
 						}

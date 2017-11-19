@@ -29,8 +29,9 @@ public interface IHomeView extends IBaseView {
 	 * @param servingTicket - The serving ticket.
 	 * @param nextTicket - The next ticket.
 	 * @param statistics - The ticket statistics.
+	 * @param systemLocation - The system location.
 	 */
-	void bindData(@Nullable Ticket currentTicket, @Nullable Ticket servingTicket, @Nullable Ticket nextTicket, Bundle statistics);
+	void bindData(@Nullable Ticket currentTicket, @Nullable Ticket servingTicket, @Nullable Ticket nextTicket, Bundle statistics, String systemLocation);
 
 	/**
 	 * Bind the system data to the UI.

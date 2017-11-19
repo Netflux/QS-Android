@@ -27,6 +27,7 @@ public class HomeView implements IHomeView {
 	private TextView _text_curTicket;
 	private TextView _label_serveOrNext;
 	private TextView _text_serveOrNext;
+	private TextView _text_location;
 	private TextView _text_waitTime;
 	private TextView _text_remainingTicketCount;
 	private TextView _text_averageDuration;
@@ -44,6 +45,7 @@ public class HomeView implements IHomeView {
 		_text_curTicket = (TextView) _rootView.findViewById(R.id.text_curTicket);
 		_label_serveOrNext = (TextView) _rootView.findViewById(R.id.label_serveOrNext);
 		_text_serveOrNext = (TextView) _rootView.findViewById(R.id.text_serveOrNext);
+		_text_location = (TextView) _rootView.findViewById(R.id.text_location);
 		_text_waitTime = (TextView) _rootView.findViewById(R.id.text_waitTime);
 		_text_remainingTicketCount = (TextView) _rootView.findViewById(R.id.text_remainingTicketCount);
 		_text_averageDuration = (TextView) _rootView.findViewById(R.id.text_averageDuration);
@@ -68,10 +70,11 @@ public class HomeView implements IHomeView {
 	}
 
 	@Override
-	public void bindData(@Nullable Ticket currentTicket, @Nullable Ticket servingTicket, @Nullable Ticket nextTicket, Bundle statistics) {
+	public void bindData(@Nullable Ticket currentTicket, @Nullable Ticket servingTicket, @Nullable Ticket nextTicket, Bundle statistics, String systemLocation) {
 		_text_curTicket.setText(currentTicket != null ? String.valueOf(currentTicket.getId()) : "-");
 		_label_serveOrNext.setText(_rootView.getContext().getString(R.string.label_curServing));
 		_text_serveOrNext.setText(servingTicket != null ? String.valueOf(servingTicket.getId()) : "-");
+		_text_location.setText(_rootView.getContext().getString(R.string.label_location, systemLocation));
 		bindStatistics(statistics);
 
 		if (servingTicket == null) {
