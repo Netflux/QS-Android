@@ -149,7 +149,7 @@ public class HomeFragment extends BaseFragment implements
 						if (systemStatus && remainingTickets.size() > 0) {
 							_view.bindData(currentTicket, servingTicket, nextTicket, statistics, systemLocation);
 						} else {
-							_view.bindData(systemStatus, statistics);
+							_view.bindData(systemStatus, statistics, systemLocation);
 						}
 						_view.toggleTicketButtonMode(currentTicket != null);
 					}

@@ -37,8 +37,9 @@ public interface IHomeView extends IBaseView {
 	 * Bind the system data to the UI.
 	 * @param systemStatus - The system status.
 	 * @param statistics - The ticket statistics.
+	 * @param systemLocation - The system location.
 	 */
-	void bindData(boolean systemStatus, Bundle statistics);
+	void bindData(boolean systemStatus, Bundle statistics, String systemLocation);
 
 	/**
 	 * Toggle the "Handle Ticket" button mode.

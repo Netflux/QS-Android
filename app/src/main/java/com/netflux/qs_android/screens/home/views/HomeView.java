@@ -97,10 +97,11 @@ public class HomeView implements IHomeView {
 	}
 
 	@Override
-	public void bindData(boolean systemStatus, Bundle statistics) {
+	public void bindData(boolean systemStatus, Bundle statistics, String systemLocation) {
 		_text_status.setText(systemStatus ? R.string.label_allTicketsServed : R.string.label_queueClosed);
 		_image_status.setImageResource(systemStatus ? R.drawable.ic_task_done_flat : R.drawable.ic_closed_flat);
 		_button_handleTicket.setEnabled(systemStatus);
+		_text_location.setText(_rootView.getContext().getString(R.string.label_location, systemLocation));
 		bindStatistics(statistics);
 
 		_progressBar.setVisibility(View.GONE);
