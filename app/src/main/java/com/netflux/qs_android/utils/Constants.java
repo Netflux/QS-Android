@@ -21,6 +21,7 @@ public final class Constants {
 		public static final String LAST_FETCH = "PREFS_LAST_FETCH";
 		public static final String SYSTEM_STATUS = "PREFS_SYSTEM_STATUS";
 		public static final String SYSTEM_LOCATION = "PREFS_SYSTEM_LOCATION";
+		public static final String SYSTEM_REMAINING = "PREFS_SYSTEM_REMAINING";
 
 	}
 

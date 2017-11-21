@@ -171,6 +171,9 @@ public final class Utils {
 								case "location":
 									bundle.putString(Constants.Prefs.SYSTEM_LOCATION, reader.nextString());
 									break;
+								case "remaining":
+									bundle.putInt(Constants.Prefs.SYSTEM_REMAINING, reader.nextInt());
+									break;
 								default:
 									reader.skipValue();
 									break;

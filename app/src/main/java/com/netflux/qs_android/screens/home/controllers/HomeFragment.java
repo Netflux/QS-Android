@@ -142,14 +142,15 @@ public class HomeFragment extends BaseFragment implements
 				final Ticket nextTicket = _ticketModel.getNextSync();
 				final List<Ticket> remainingTickets = _ticketModel.getRemainingSync();
 				final Bundle statistics = _ticketModel.getStatistics(servingTicket, remainingTickets);
+				final int remainingTicketCount = prefs.getInt(Constants.Prefs.SYSTEM_REMAINING, 0);
 
 				MainThreadPoster.getInstance().post(new Runnable() {
 					@Override
 					public void run() {
 						if (systemStatus && remainingTickets.size() > 0) {
-							_view.bindData(currentTicket, servingTicket, nextTicket, statistics, systemLocation);
+							_view.bindData(currentTicket, servingTicket, nextTicket, statistics, systemLocation, remainingTicketCount);
 						} else {
-							_view.bindData(systemStatus, statistics, systemLocation);
+							_view.bindData(systemStatus, statistics, systemLocation, remainingTicketCount);
 						}
 						_view.toggleTicketButtonMode(currentTicket != null);
 					}

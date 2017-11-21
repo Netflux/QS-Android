@@ -132,6 +132,7 @@ public class UpdateService extends Service {
 			if (bundle != null) {
 				editor.putBoolean(Constants.Prefs.SYSTEM_STATUS, bundle.getInt(Constants.Prefs.SYSTEM_STATUS) == 1);
 				editor.putString(Constants.Prefs.SYSTEM_LOCATION, bundle.getString(Constants.Prefs.SYSTEM_LOCATION));
+				editor.putInt(Constants.Prefs.SYSTEM_REMAINING, bundle.getInt(Constants.Prefs.SYSTEM_REMAINING));
 			}
 
 			if (result != null && result.size() > 0) {

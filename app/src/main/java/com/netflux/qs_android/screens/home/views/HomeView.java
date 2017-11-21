@@ -70,12 +70,12 @@ public class HomeView implements IHomeView {
 	}
 
 	@Override
-	public void bindData(@Nullable Ticket currentTicket, @Nullable Ticket servingTicket, @Nullable Ticket nextTicket, Bundle statistics, String systemLocation) {
+	public void bindData(@Nullable Ticket currentTicket, @Nullable Ticket servingTicket, @Nullable Ticket nextTicket, Bundle statistics, String systemLocation, int remainingTickets) {
 		_text_curTicket.setText(currentTicket != null ? String.valueOf(currentTicket.getId()) : "-");
 		_label_serveOrNext.setText(_rootView.getContext().getString(R.string.label_curServing));
 		_text_serveOrNext.setText(servingTicket != null ? String.valueOf(servingTicket.getId()) : "-");
 		_text_location.setText(_rootView.getContext().getString(R.string.label_location, systemLocation));
-		bindStatistics(statistics);
+		bindStatistics(statistics, remainingTickets);
 
 		if (servingTicket == null) {
 			if (nextTicket != null) {
@@ -93,23 +93,24 @@ public class HomeView implements IHomeView {
 		_progressBar.setVisibility(View.GONE);
 		_layout_status.setVisibility(View.GONE);
 		_layout_tickets.setVisibility(View.VISIBLE);
-		_button_handleTicket.setEnabled(true);
+		_button_handleTicket.setEnabled(currentTicket != null || remainingTickets > 0);
 	}
 
 	@Override
-	public void bindData(boolean systemStatus, Bundle statistics, String systemLocation) {
+	public void bindData(boolean systemStatus, Bundle statistics, String systemLocation, int remainingTickets) {
 		_text_status.setText(systemStatus ? R.string.label_allTicketsServed : R.string.label_queueClosed);
 		_image_status.setImageResource(systemStatus ? R.drawable.ic_task_done_flat : R.drawable.ic_closed_flat);
 		_button_handleTicket.setEnabled(systemStatus);
 		_text_location.setText(_rootView.getContext().getString(R.string.label_location, systemLocation));
-		bindStatistics(statistics);
+		bindStatistics(statistics, remainingTickets);
 
 		_progressBar.setVisibility(View.GONE);
 		_layout_status.setVisibility(View.VISIBLE);
 		_layout_tickets.setVisibility(View.GONE);
+		_button_handleTicket.setEnabled(remainingTickets > 0);
 	}
 
-	private void bindStatistics(Bundle statistics) {
+	private void bindStatistics(Bundle statistics, int remainingTickets) {
 		int estimatedWaitTime = (int) Math.ceil((double) statistics.getLong(TicketModel.KEY_WAITING_TIME) / 60000);
 		int remainingTicketCount = statistics.getInt(TicketModel.KEY_REMAINING_COUNT);
 		int averageDuration = (int) Math.ceil((double) statistics.getLong(TicketModel.KEY_DURATION) / 60000);
@@ -117,7 +118,7 @@ public class HomeView implements IHomeView {
 		estimatedWaitTime += averageDuration * remainingTicketCount;
 
 		_text_waitTime.setText(getRootView().getContext().getString(R.string.label_estimatedWaitTime, estimatedWaitTime < 1 ? "<1" : "~" + estimatedWaitTime));
-		_text_remainingTicketCount.setText(getRootView().getContext().getString(R.string.label_remainingTicketCount, remainingTicketCount));
+		_text_remainingTicketCount.setText(getRootView().getContext().getString(R.string.label_remainingTicketCount, remainingTickets));
 		_text_averageDuration.setText(getRootView().getContext().getString(R.string.label_averageDuration, averageDuration < 1 ? "<1" : "~" + averageDuration));
 	}
 

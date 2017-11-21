@@ -30,16 +30,18 @@ public interface IHomeView extends IBaseView {
 	 * @param nextTicket - The next ticket.
 	 * @param statistics - The ticket statistics.
 	 * @param systemLocation - The system location.
+	 * @param remainingTickets - The remaining ticket count.
 	 */
-	void bindData(@Nullable Ticket currentTicket, @Nullable Ticket servingTicket, @Nullable Ticket nextTicket, Bundle statistics, String systemLocation);
+	void bindData(@Nullable Ticket currentTicket, @Nullable Ticket servingTicket, @Nullable Ticket nextTicket, Bundle statistics, String systemLocation, int remainingTickets);
 
 	/**
 	 * Bind the system data to the UI.
 	 * @param systemStatus - The system status.
 	 * @param statistics - The ticket statistics.
 	 * @param systemLocation - The system location.
+	 * @param remainingTickets - The remaining ticket count.
 	 */
-	void bindData(boolean systemStatus, Bundle statistics, String systemLocation);
+	void bindData(boolean systemStatus, Bundle statistics, String systemLocation, int remainingTickets);
 
 	/**
 	 * Toggle the "Handle Ticket" button mode.
