@@ -107,7 +107,7 @@ public class HomeView implements IHomeView {
 		_progressBar.setVisibility(View.GONE);
 		_layout_status.setVisibility(View.VISIBLE);
 		_layout_tickets.setVisibility(View.GONE);
-		_button_handleTicket.setEnabled(remainingTickets > 0);
+		_button_handleTicket.setEnabled(systemStatus && remainingTickets > 0);
 	}
 
 	private void bindStatistics(Bundle statistics, int remainingTickets) {
